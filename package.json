@@ -1,11 +1,14 @@
 {
   "name": "comunitis-client",
   "version": "0.0.1",
-  "description": "",
+  "description": "TypeScript client library for the comunitis p2p network",
   "type": "module",
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
-    "prepublishOnly": "npm run build"
+    "proto": "buf generate",
+    "build": "npm run proto && tsup src/index.ts --format cjs,esm --dts",
+    "prepublishOnly": "npm run build",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "repository": {
     "type": "git",
@@ -18,10 +21,35 @@
     "url": "https://github.com/yihan-technologies/comunitis-client-js/issues"
   },
   "homepage": "https://github.com/yihan-technologies/comunitis-client-js#readme",
+  "dependencies": {
+    "@bufbuild/protobuf": "^2.12.0",
+    "@chainsafe/libp2p-noise": "^17.0.0",
+    "@chainsafe/libp2p-yamux": "^8.0.1",
+    "@libp2p/bootstrap": "^12.0.25",
+    "@libp2p/circuit-relay-v2": "^4.2.7",
+    "@libp2p/dcutr": "^3.0.22",
+    "@libp2p/identify": "^4.1.8",
+    "@libp2p/kad-dht": "^16.3.3",
+    "@libp2p/peer-id": "^6.0.11",
+    "@libp2p/ping": "^3.1.7",
+    "@libp2p/pnet": "^3.0.23",
+    "@libp2p/webrtc": "^6.0.25",
+    "@libp2p/websockets": "^10.1.15",
+    "@libp2p/webtransport": "^6.0.30",
+    "@noble/curves": "^2.2.0",
+    "@noble/hashes": "^2.2.0",
+    "hash-wasm": "^4.12.0",
+    "it-length-prefixed": "^11.0.1",
+    "it-pipe": "^3.0.1",
+    "libp2p": "^3.3.4"
+  },
   "devDependencies": {
-    "@types/node": "^25.9.2",
+    "@bufbuild/buf": "^1.71.0",
+    "@bufbuild/protoc-gen-es": "^2.12.0",
+    "@types/node": "^25.9.4",
     "tsup": "^8.5.1",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.9"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

@@ -1,8 +1,16 @@
-export interface GreetingOptions {
-  uppercase?: boolean;
-}
+export { ComunitisClient } from './client/index.js';
+export type { ClientConfig, RequestOptions } from './client/types.js';
 
-export function sayHello(name: string, options?: GreetingOptions): string {
-  const message = `Hello, ${name}!`;
-  return options?.uppercase ? message.toUpperCase() : message;
-}
+export { KeyManager } from './keymanager/index.js';
+export type { KeyManagerOptions } from './keymanager/index.js';
+export type { KeyMeta, FieldKeyChain, FieldKeyVersion, AltSalt, ExportBundle } from './keymanager/types.js';
+export { KeyTypeSigning, KeyTypeEncryption, KeyStatusActive, KeyStatusRevoked, ChainStatusActive, ChainStatusRevoked } from './keymanager/types.js';
+
+export type { IStorage, StorageOptions } from './storage/interface.js';
+
+export { encodeFields, decodeFields } from './protocol/fields.js';
+export type { FieldDef } from './protocol/fields.js';
+export { encodeTime, decodeTime } from './protocol/time.js';
+export { CLIENT_PROTOCOL } from './protocol/constants.js';
+
+export * from './proto/index_pb.js';
