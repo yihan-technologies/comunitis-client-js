@@ -78,7 +78,7 @@ export class ComunitisClient extends EventTarget {
 
   async connect(): Promise<void> {
     const cfg = this.config;
-    const usePSK = cfg.clientPSK != null && cfg.clientPSK.length > 0;
+    //const usePSK = cfg.clientPSK != null && cfg.clientPSK.length > 0;
 
     this.node = await createLibp2p({
       transports: [
@@ -88,7 +88,7 @@ export class ComunitisClient extends EventTarget {
         circuitRelayTransport(),
       ],
       connectionEncrypters: [noise()],
-      ...(usePSK ? { connectionProtector: preSharedKey({ psk: cfg.clientPSK! }) } : {}),
+      //...(usePSK ? { connectionProtector: preSharedKey({ psk: cfg.clientPSK! }) } : {}),
       streamMuxers: [yamux()],
       peerDiscovery: [
         bootstrap({ list: cfg.bootstrapAddresses }),
