@@ -604,6 +604,13 @@ export class KeyManager {
     return meta;
   }
 
+  getPrivKey(keyId: string): Uint8Array {
+    if (!this.metas.has(keyId)) throw new KeyNotFoundError();
+    const priv = this.privKeys.get(keyId);
+    if (!priv) throw new NoL2PasswordError();
+    return priv;
+  }
+
   listKeys(): KeyMeta[] {
     return [...this.metas.values()];
   }

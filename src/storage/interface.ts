@@ -8,4 +8,5 @@ export interface IStorage {
   set<T = unknown>(key: string, value: T, options?: StorageOptions): Promise<void>;
   delete(key: string, options?: StorageOptions): Promise<void>;
   has(key: string, options?: StorageOptions): Promise<boolean>;
+  scan(prefix: string, options?: StorageOptions): Promise<string[]>;
 }

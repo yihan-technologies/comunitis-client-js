@@ -94,7 +94,7 @@ describe('Ed25519 signing', () => {
     const { pub, priv } = generateSigningKey();
     const msg = new TextEncoder().encode('test message');
     const sig = signBytes(priv, msg);
-    msg[0] ^= 0xff;
+    msg[0] = msg[0]! ^ 0xff;
     expect(verifyBytes(pub, msg, sig)).toBe(false);
   });
 

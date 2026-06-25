@@ -26,6 +26,9 @@ class MemStorage implements IStorage {
   async has(key: string): Promise<boolean> {
     return this.store.has(key);
   }
+  async scan(prefix: string): Promise<string[]> {
+    return [...this.store.keys()].filter(k => k.startsWith(prefix));
+  }
 }
 
 const L1 = 'password1';
@@ -74,7 +77,7 @@ describe('KeyManager — signing keys', () => {
     const meta = await km.createSigningKey('s');
     const msg = new TextEncoder().encode('data');
     const sig = await km.sign(meta.id, msg);
-    msg[0] ^= 0xff;
+    msg[0] = msg[0]! ^ 0xff;
     expect(await km.verify(meta.id, msg, sig)).toBe(false);
   });
 
