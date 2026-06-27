@@ -1,5 +1,6 @@
 export { ComunitisClient } from './client/index.js';
 export type { ClientConfig, RequestOptions } from './client/types.js';
+export type { ServerStatsResponse } from './client/index.js';
 
 export { KeyManager } from './keymanager/index.js';
 export type { KeyManagerOptions } from './keymanager/index.js';

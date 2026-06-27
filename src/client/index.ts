@@ -31,6 +31,24 @@ import {
   SingleInst,
   type Response,
 } from '../proto/index_pb.js';
+
+export interface ServerStatsResponse {
+  serverPeerCount: number;
+  serverPeers: string[];
+  clientPeerCount: number;
+  clientPeers: string[];
+  ramTotalBytes: number;
+  ramUsedBytes: number;
+  ramFreeBytes: number;
+  cpuUsedPercent: number;
+  diskTotalBytes: number;
+  diskUsedBytes: number;
+  diskFreeBytes: number;
+  timestamp: number;
+}
+
+// ponytail: cast avoids proto regeneration; wire value is raw int32
+const SERVER_STATS_INST = 19 as unknown as SingleInst;
 import { randomUUID } from '../util/uuid.js';
 
 // Module-level lazy multiformats imports — evaluated once on first call, not on
@@ -108,7 +126,41 @@ export class ComunitisClient extends EventTarget {
       this.handleInbound(stream, connection).catch(() => stream.abort(new Error('handler error')));
     });
 
-    await this.node.start();
+    // Track peer count changes and emit events for consumers.
+    const onPeerChange = () => this.dispatchEvent(new CustomEvent('peercountchange'));
+    this.node.addEventListener('peer:connect', onPeerChange);
+    this.node.addEventListener('peer:disconnect', onPeerChange);
+
+    let started = false;
+    try {
+      await this.node.start();
+      started = true;
+
+      console.log("NODE STARTED WITH ADDRESSES: ", this.config.bootstrapAddresses);
+
+      // Wait for at least one bootstrap peer to connect (15s timeout).
+      await new Promise<void>((resolve, reject) => {
+        const peers = this.node!.getPeers();
+        if (peers.length > 0) { resolve(); return; }
+        const tid = setTimeout(() => reject(new Error('no bootstrap peer connected')), 15000);
+        const handler = () => { clearTimeout(tid); resolve(); };
+        this.node!.addEventListener('peer:connect', handler, { once: true });
+      });
+
+      console.log("CONNECTED TO: ", this.node.getPeers());
+
+      // Refresh DHT routing table from the connected peer.
+      const dhtSvc = (this.node.services as Record<string, unknown>)['dht'] as { refreshRoutingTable?: () => void | Promise<void> } | undefined;
+      if (typeof dhtSvc?.refreshRoutingTable === 'function') {
+        Promise.resolve(dhtSvc.refreshRoutingTable()).catch(() => null); // fire-and-forget
+      }
+    } catch (err) {
+      // Clean up the node so the client can be reconnected.
+      if (started) await Promise.resolve(this.node.stop()).catch(() => null);
+      else this.node.removeEventListener('peer:connect', onPeerChange);
+      this.node = null;
+      throw err;
+    }
   }
 
   async disconnect(): Promise<void> {
@@ -120,6 +172,10 @@ export class ComunitisClient extends EventTarget {
 
   get peerId(): PeerId | undefined {
     return this.node?.peerId;
+  }
+
+  getPeerCount(): number {
+    return this.node?.getPeers().length ?? 0;
   }
 
   // ── Protocol methods (outbound) ─────────────────────────────────────────────
@@ -166,6 +222,12 @@ export class ComunitisClient extends EventTarget {
 
   async expressionCall(data: Uint8Array, opts?: RequestOptions): Promise<Uint8Array> {
     return this.request(SingleInst.EXPRESSION_CALL, data, opts);
+  }
+
+  async serverStats(opts?: RequestOptions): Promise<ServerStatsResponse> {
+    const raw = await this.request(SERVER_STATS_INST, new Uint8Array(), opts);
+    const wrapper = fromBinary(GraphQueryResponseSchema, raw);
+    return JSON.parse(new TextDecoder().decode(wrapper.Data)) as ServerStatsResponse;
   }
 
   // ── Internal request/response ───────────────────────────────────────────────
@@ -290,13 +352,17 @@ export class ComunitisClient extends EventTarget {
     const keyBytes = new TextEncoder().encode(this.config.clientDiscoveryKey);
     const digest = await sha256.digest(keyBytes);
     const cid = CID.createV1(0x55 /* raw */, digest);
+    
+    console.log("LOOKING FOR PEERS: ")
 
     const findProviders = (dht as { findProviders?: Function })['findProviders'];
     if (typeof findProviders === 'function') {
       const gen = findProviders.call(dht, cid, { signal });
       for await (const provider of gen as AsyncIterable<{ id: PeerId }>) {
         if (provider.id.toString() !== node.peerId.toString()) {
+          console.log("FOUND: PAIR IN DHT: ", provider.id)
           return provider.id;
+
         }
       }
     }
