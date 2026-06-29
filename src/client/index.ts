@@ -1,16 +1,18 @@
 import { createLibp2p } from 'libp2p';
 import { webSockets } from '@libp2p/websockets';
+import { fromString } from 'uint8arrays/from-string'
 import { webRTC } from '@libp2p/webrtc';
 import { webTransport } from '@libp2p/webtransport';
 import { circuitRelayTransport } from '@libp2p/circuit-relay-v2';
 import { noise } from '@chainsafe/libp2p-noise';
 import { yamux } from '@chainsafe/libp2p-yamux';
 import { bootstrap } from '@libp2p/bootstrap';
-import { kadDHT } from '@libp2p/kad-dht';
+import { ComunitisKadDHT, CLIENT_PROTOCOL as DHT_PROTOCOL } from '../dht/index.js';
 import { identify } from '@libp2p/identify';
 import { dcutr } from '@libp2p/dcutr';
 import { ping } from '@libp2p/ping';
 import { preSharedKey } from '@libp2p/pnet';
+import { multiaddr } from '@multiformats/multiaddr';
 import { create as pbCreate, toBinary, fromBinary } from '@bufbuild/protobuf';
 import type { Libp2p, PeerId, Stream, Connection } from '@libp2p/interface';
 import type { ClientConfig, RequestOptions } from './types.js';
@@ -50,11 +52,7 @@ export interface ServerStatsResponse {
 // ponytail: cast avoids proto regeneration; wire value is raw int32
 const SERVER_STATS_INST = 19 as unknown as SingleInst;
 import { randomUUID } from '../util/uuid.js';
-
-// Module-level lazy multiformats imports — evaluated once on first call, not on
-// every discoverServer invocation.
-const _cidImport = import('multiformats/cid');
-const _sha2Import = import('multiformats/hashes/sha2');
+import { peerIdFromString } from '@libp2p/peer-id';
 
 // Encode a raw 32-byte Ed25519 public key as a libp2p pb.PublicKey protobuf:
 //   field 1 (KeyType = Ed25519 = 1): 0x08 0x01
@@ -81,6 +79,9 @@ function unmarshalEd25519PubKey(marshaled: Uint8Array): Uint8Array | null {
 export class ComunitisClient extends EventTarget {
   private config: ClientConfig;
   private node: Libp2p | null = null;
+  private dht: ComunitisKadDHT | null = null;
+  // Peer IDs parsed from bootstrap addresses — these are the server peers.
+  private bootstrapPeerIds: Set<string> = new Set();
 
   /**
    * Async alternative to addEventListener('request', ...) for inbound requests.
@@ -108,14 +109,15 @@ export class ComunitisClient extends EventTarget {
       connectionEncrypters: [noise()],
       //...(usePSK ? { connectionProtector: preSharedKey({ psk: cfg.clientPSK! }) } : {}),
       streamMuxers: [yamux()],
+      // ponytail: allow private IPs and plain ws — browser default blocks both; server handles auth
+      connectionGater: {
+        denyDialMultiaddr: () => false,
+      },
       peerDiscovery: [
         bootstrap({ list: cfg.bootstrapAddresses }),
       ],
       services: {
         ping: ping(),
-        // clientMode: true — participate in routing queries but don't store
-        // records or serve as a full DHT node, reducing resource usage.
-        dht: kadDHT({ clientMode: true }),
         identify: identify(),
         dcutr: dcutr(),
       },
@@ -136,26 +138,48 @@ export class ComunitisClient extends EventTarget {
       await this.node.start();
       started = true;
 
-      console.log("NODE STARTED WITH ADDRESSES: ", this.config.bootstrapAddresses);
-
-      // Wait for at least one bootstrap peer to connect (15s timeout).
-      await new Promise<void>((resolve, reject) => {
-        const peers = this.node!.getPeers();
-        if (peers.length > 0) { resolve(); return; }
-        const tid = setTimeout(() => reject(new Error('no bootstrap peer connected')), 15000);
-        const handler = () => { clearTimeout(tid); resolve(); };
-        this.node!.addEventListener('peer:connect', handler, { once: true });
-      });
-
-      console.log("CONNECTED TO: ", this.node.getPeers());
-
-      // Refresh DHT routing table from the connected peer.
-      const dhtSvc = (this.node.services as Record<string, unknown>)['dht'] as { refreshRoutingTable?: () => void | Promise<void> } | undefined;
-      if (typeof dhtSvc?.refreshRoutingTable === 'function') {
-        Promise.resolve(dhtSvc.refreshRoutingTable()).catch(() => null); // fire-and-forget
+      if (cfg.bootstrapAddresses.length === 0) {
+        throw new Error('no bootstrap addresses configured');
       }
+
+      // In browsers only WebSocket, WebRTC, and WebTransport work — raw TCP is silently
+      // skipped by all transports which causes auto-dial to fail without a clear error.
+      // Prefer browser-compatible addresses; fall back to all if none are tagged.
+      const compat = cfg.bootstrapAddresses.filter(
+        a => /\/ws($|\/)/.test(a) || a.includes('/webrtc') || a.includes('/webtransport')
+      );
+      const toDialStrs = compat.length > 0 ? compat : cfg.bootstrapAddresses;
+      const toDialMas = toDialStrs.map(a => multiaddr(a));
+
+      console.log('[p2p] dialing bootstrap peers:', toDialStrs);
+
+      // Dial all filtered addresses in parallel — succeed as soon as one connects.
+      // This bypasses the bootstrap-module auto-dial race that can stall on raw TCP.
+      await Promise.any(
+        toDialMas.map(ma =>
+          this.node!.dial(ma, { signal: AbortSignal.timeout(15000) }).catch(e => {
+            console.warn('[p2p] dial failed:', ma.toString(), e?.message);
+            throw e;
+          })
+        )
+      ).catch(() => { throw new Error('could not connect to any bootstrap peer'); });
+
+      console.log('[p2p] connected, peers:', this.node.getPeers().map(p => p.toString()));
+
+      // Record bootstrap peer IDs for fast server discovery — extract /p2p/<id> from each addr.
+      this.bootstrapPeerIds.clear();
+      for (const addrStr of cfg.bootstrapAddresses) {
+        const m = addrStr.match(/\/p2p\/([^/]+)/);
+        if (m?.[1]) this.bootstrapPeerIds.add(m[1]);
+      }
+
+      // Start custom DHT and fill routing table from the connected peer.
+      this.dht = new ComunitisKadDHT(this.node, DHT_PROTOCOL);
+      await this.dht.start();
+      await this.dht.refreshRoutingTable().catch((e) => {
+        console.log("START DHT ERROR: ", e)
+      });
     } catch (err) {
-      // Clean up the node so the client can be reconnected.
       if (started) await Promise.resolve(this.node.stop()).catch(() => null);
       else this.node.removeEventListener('peer:connect', onPeerChange);
       this.node = null;
@@ -164,10 +188,19 @@ export class ComunitisClient extends EventTarget {
   }
 
   async disconnect(): Promise<void> {
+    if (this.dht) {
+      await this.dht.stop().catch(() => null);
+      this.dht = null;
+    }
     if (this.node) {
       await this.node.stop();
       this.node = null;
     }
+  }
+
+  /** Find which servers host a given comuniti via DHT. */
+  async findComunitiServers(comunitiId: string): Promise<Uint8Array | null> {
+    return this.dht?.findComunitiServers(comunitiId) ?? null;
   }
 
   get peerId(): PeerId | undefined {
@@ -339,34 +372,69 @@ export class ComunitisClient extends EventTarget {
 
   private async discoverServer(timeout: number): Promise<PeerId> {
     const node = this.node!;
-    const signal = AbortSignal.timeout(timeout);
 
-    const dht = (node.services as Record<string, unknown>)['dht'];
-    if (!dht || typeof dht !== 'object') {
-      throw new Error('DHT service not available');
+    //Fast path: return a connected bootstrap peer (= server) directly.
+    for (const peer of node.getPeers()) {
+      if (this.bootstrapPeerIds.has(peer.toString())) {
+        return peer;
+      }
     }
 
-    // Build a CIDv1 (raw codec, sha256 multihash) matching go-libp2p's discutil.Advertise:
-    //   nsToCid(ns) = cid.NewCidV1(cid.Raw, mh.Sum([]byte(ns), mh.SHA2_256, -1))
-    const [{ CID }, { sha256 }] = await Promise.all([_cidImport, _sha2Import]);
-    const keyBytes = new TextEncoder().encode(this.config.clientDiscoveryKey);
-    const digest = await sha256.digest(keyBytes);
-    const cid = CID.createV1(0x55 /* raw */, digest);
-    
-    console.log("LOOKING FOR PEERS: ")
+    const rootPeerID =  peerIdFromString(this.config.comunitiID as string)
 
-    const findProviders = (dht as { findProviders?: Function })['findProviders'];
-    if (typeof findProviders === 'function') {
-      const gen = findProviders.call(dht, cid, { signal });
-      for await (const provider of gen as AsyncIterable<{ id: PeerId }>) {
-        if (provider.id.toString() !== node.peerId.toString()) {
-          console.log("FOUND: PAIR IN DHT: ", provider.id)
-          return provider.id;
+    const res = await this.dht?.findPeer(rootPeerID)
+    if(res != undefined){
+      return res?.id
+    }
 
-        }
-      }
+    // Slow path: re-dial bootstrap addresses.
+    const cfg = this.config;
+    const compat = cfg.bootstrapAddresses.filter(
+      a => /\/ws($|\/)/.test(a) || a.includes('/webrtc') || a.includes('/webtransport')
+    );
+    const toDialStrs = compat.length > 0 ? compat : cfg.bootstrapAddresses;
+    try {
+      const conn = await Promise.any(
+        toDialStrs.map(a =>
+          node.dial(multiaddr(a), { signal: AbortSignal.timeout(timeout) }).catch(e => { throw e; })
+        )
+      );
+      return conn.remotePeer;
+    } catch {
+      // intentional fall-through
     }
 
     throw new Error('no server peer found for discovery key: ' + this.config.clientDiscoveryKey);
   }
+
+
+  //   private async discoverServer(timeout: number): Promise<PeerId> {
+  //   const node = this.node!;
+
+  //   // Server peer IDs come from bootstrap addresses — check connected peers first.
+  //   for (const peer of node.getPeers()) {
+  //     if (this.bootstrapPeerIds.has(peer.toString())) {
+  //       return peer;
+  //     }
+  //   }
+
+  //   // Not currently connected — re-dial bootstrap addresses.
+  //   const cfg = this.config;
+  //   const compat = cfg.bootstrapAddresses.filter(
+  //     a => /\/ws($|\/)/.test(a) || a.includes('/webrtc') || a.includes('/webtransport')
+  //   );
+  //   const toDialStrs = compat.length > 0 ? compat : cfg.bootstrapAddresses;
+  //   const conn = await Promise.any(
+  //     toDialStrs.map(a =>
+  //       node.dial(multiaddr(a), { signal: AbortSignal.timeout(timeout) }).catch(e => {
+  //         console.warn('[p2p] reconnect failed:', a, e?.message);
+  //         throw e;
+  //       })
+  //     )
+  //   ).catch(() => { throw new Error('could not reconnect to any server'); });
+
+  //   return conn.remotePeer;
+  // }
+
+
 }
