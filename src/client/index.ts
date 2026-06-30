@@ -30,6 +30,8 @@ import {
   BatchEntryRequestSchema,
   type GraphQueryResponse, GraphQueryResponseSchema,
   GraphQueryRequestSchema,
+  type RootObjectBlocksResponse, RootObjectBlocksResponseSchema,
+  RootObjectBlocksRequestSchema,
   SingleInst,
   type Response,
 } from '../proto/index_pb.js';
@@ -65,6 +67,10 @@ function marshalEd25519PubKey(rawPub: Uint8Array): Uint8Array {
   out.set(rawPub, 4);
   return out;
 }
+
+/*
+{'myDestinationBankCode': '090480', 'myDestinationAccountNumber': '0993417574', 'myAccountName': 'ERCAS-DASHME TECHNOLOGIES LTD/Dashme Technologies LTD', 'myOriginatorName': 'ERCAS INTEGRATED SOLUTIONS LIMITED', 'myNarration': 'Settlement Transfer', 'myPaymentReference': '019F1893FBB177F68F1F949105176A33', 'myAmount': '53535.00', 'sourceAccountNo': '0122675636'}}, 'response': {'status_code': 200, 'content': {'code': None, 'message': None, 'responseCode': '30', 'sessionId': '000017260630134939508078190153'}}, 'duration': 13.676746}
+*/
 
 // Extract the raw 32-byte Ed25519 pubkey from a marshaled libp2p pb.PublicKey.
 // Format: [0x08, 0x01, 0x12, <len>, ...key bytes]
@@ -322,6 +328,17 @@ export class ComunitisClient extends EventTarget {
     const returned =  JSON.parse(new TextDecoder().decode(wrapper.Data)) as ServerStatsResponse;
     //console.log("SERVER STATS RETURNED: ", returned)
     return returned
+  }
+
+  async rootObjectBlocks(
+    fileIDIndex = 0,
+    fileInternalIndex = 0,
+    opts?: RequestOptions,
+  ): Promise<RootObjectBlocksResponse> {
+    const req = pbCreate(RootObjectBlocksRequestSchema, { FileIDIndex: fileIDIndex, FileInternalIndex: fileInternalIndex });
+    const data = toBinary(RootObjectBlocksRequestSchema, req);
+    const raw = await this.request(SingleInst.ROOT_OBJECT_BLOCKS, data, opts);
+    return fromBinary(RootObjectBlocksResponseSchema, raw);
   }
 
   // ── Internal request/response ───────────────────────────────────────────────
