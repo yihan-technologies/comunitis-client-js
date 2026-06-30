@@ -76,10 +76,14 @@ function unmarshalEd25519PubKey(marshaled: Uint8Array): Uint8Array | null {
   return marshaled.slice(4, 36);
 }
 
+const MIN_PEERS = 3;
+const RECONNECT_INTERVAL_MS = 10_000;
+
 export class ComunitisClient extends EventTarget {
   private config: ClientConfig;
   private node: Libp2p | null = null;
   private dht: ComunitisKadDHT | null = null;
+  private reconnectTimer: ReturnType<typeof setInterval> | null = null;
   // Peer IDs parsed from bootstrap addresses — these are the server peers.
   private bootstrapPeerIds: Set<string> = new Set();
 
@@ -168,6 +172,7 @@ export class ComunitisClient extends EventTarget {
 
       // Record bootstrap peer IDs for fast server discovery — extract /p2p/<id> from each addr.
       this.bootstrapPeerIds.clear();
+      
       for (const addrStr of cfg.bootstrapAddresses) {
         const m = addrStr.match(/\/p2p\/([^/]+)/);
         if (m?.[1]) this.bootstrapPeerIds.add(m[1]);
@@ -179,6 +184,8 @@ export class ComunitisClient extends EventTarget {
       await this.dht.refreshRoutingTable().catch((e) => {
         console.log("START DHT ERROR: ", e)
       });
+
+      this.startReconnectLoop();
     } catch (err) {
       if (started) await Promise.resolve(this.node.stop()).catch(() => null);
       else this.node.removeEventListener('peer:connect', onPeerChange);
@@ -188,6 +195,10 @@ export class ComunitisClient extends EventTarget {
   }
 
   async disconnect(): Promise<void> {
+    if (this.reconnectTimer) {
+      clearInterval(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
     if (this.dht) {
       await this.dht.stop().catch(() => null);
       this.dht = null;
@@ -196,6 +207,54 @@ export class ComunitisClient extends EventTarget {
       await this.node.stop();
       this.node = null;
     }
+  }
+
+  private startReconnectLoop(): void {
+    this.reconnectTimer = setInterval(async () => {
+      const node = this.node;
+      if (!node) return;
+
+      const peers = node.getPeers();
+      if (peers.length >= MIN_PEERS) return;
+
+      console.log(`[p2p] peer count ${peers.length} < ${MIN_PEERS}, reconnecting...`);
+
+      const connectedIds = new Set(peers.map(p => p.toString()));
+
+      // 1. Try DHT routing table peers first (libp2p peerStore has their addrs).
+      if (this.dht) {
+        const dhtPeers = this.dht.getKnownPeerIds().filter(p => !connectedIds.has(p.toString()));
+        if (dhtPeers.length > 0) {
+          await Promise.allSettled(
+            dhtPeers.map(p =>
+              node.dial(p, { signal: AbortSignal.timeout(RECONNECT_INTERVAL_MS) }).catch(e => {
+                console.warn('[p2p] dht reconnect failed:', p.toString(), e?.message);
+              })
+            )
+          );
+          if (node.getPeers().length >= MIN_PEERS) return;
+        }
+      }
+
+      // 2. Fall back to bootstrap addresses.
+      const cfg = this.config;
+      const compat = cfg.bootstrapAddresses.filter(
+        a => /\/ws($|\/)/.test(a) || a.includes('/webrtc') || a.includes('/webtransport')
+      );
+      const toDialStrs = compat.length > 0 ? compat : cfg.bootstrapAddresses;
+      const toRedial = toDialStrs.filter(a => {
+        const m = a.match(/\/p2p\/([^/]+)/);
+        return !m?.[1] || !connectedIds.has(m[1]);
+      });
+
+      await Promise.allSettled(
+        toRedial.map(a =>
+          node.dial(multiaddr(a), { signal: AbortSignal.timeout(RECONNECT_INTERVAL_MS) }).catch(e => {
+            console.warn('[p2p] bootstrap reconnect failed:', a, e?.message);
+          })
+        )
+      );
+    }, RECONNECT_INTERVAL_MS);
   }
 
   /** Find which servers host a given comuniti via DHT. */
@@ -260,7 +319,9 @@ export class ComunitisClient extends EventTarget {
   async serverStats(opts?: RequestOptions): Promise<ServerStatsResponse> {
     const raw = await this.request(SERVER_STATS_INST, new Uint8Array(), opts);
     const wrapper = fromBinary(GraphQueryResponseSchema, raw);
-    return JSON.parse(new TextDecoder().decode(wrapper.Data)) as ServerStatsResponse;
+    const returned =  JSON.parse(new TextDecoder().decode(wrapper.Data)) as ServerStatsResponse;
+    //console.log("SERVER STATS RETURNED: ", returned)
+    return returned
   }
 
   // ── Internal request/response ───────────────────────────────────────────────

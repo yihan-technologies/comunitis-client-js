@@ -143,6 +143,11 @@ export class ComunitisKadDHT {
     return found ? { id: found.peerId, addrs: found.addrs } : null;
   }
 
+  /** All peer IDs currently in the routing table. */
+  getKnownPeerIds(): PeerId[] {
+    return this.rt.closestPeers(this.selfId, K * 8).map(e => e.peerId);
+  }
+
   // --- stream handler (serves incoming DHT queries) ---
 
   private async handleStream(stream: Stream): Promise<void> {
