@@ -19,6 +19,8 @@ import type { ClientConfig, RequestOptions } from './types.js';
 import { CLIENT_PROTOCOL } from '../protocol/constants.js';
 import { sendAndReceive, writeMessage, readMessage } from '../protocol/stream.js';
 import { signRequest, signResponse, verifyResponse } from '../protocol/signing.js';
+import { signBytes } from '../keymanager/crypto.js';
+import { encodeTime } from '../protocol/time.js';
 import {
   TransferSingleSchema, type TransferSingle,
   type CreateComunitiInitialResponse, CreateComunitiInitialResponseSchema,
@@ -53,6 +55,27 @@ export interface ServerStatsResponse {
 
 // ponytail: cast avoids proto regeneration; wire value is raw int32
 const SERVER_STATS_INST = 19 as unknown as SingleInst;
+const ROOT_OBJECT_WRITE_INST = 21 as unknown as SingleInst;
+
+// Inline protowire encoder for RootObjectWriteRequest (field 1=Data, 2=Signature, 3=Time).
+// Avoids proto regeneration — Go handler decodes with protowire.
+function _varint(n: number): Uint8Array {
+  const r: number[] = [];
+  while (n > 127) { r.push((n & 0x7f) | 0x80); n >>>= 7; }
+  r.push(n); return new Uint8Array(r);
+}
+function _wireBytes(field: number, b: Uint8Array): Uint8Array {
+  const tag = _varint((field << 3) | 2), len = _varint(b.length);
+  const out = new Uint8Array(tag.length + len.length + b.length);
+  out.set(tag); out.set(len, tag.length); out.set(b, tag.length + len.length);
+  return out;
+}
+function _encodeRootWriteProto(data: Uint8Array, sig: Uint8Array, time: Uint8Array): Uint8Array {
+  const parts = [_wireBytes(1, data), _wireBytes(2, sig), _wireBytes(3, time)];
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let off = 0; for (const p of parts) { out.set(p, off); off += p.length; }
+  return out;
+}
 import { randomUUID } from '../util/uuid.js';
 import { peerIdFromString } from '@libp2p/peer-id';
 
@@ -339,6 +362,19 @@ export class ComunitisClient extends EventTarget {
     const data = toBinary(RootObjectBlocksRequestSchema, req);
     const raw = await this.request(SingleInst.ROOT_OBJECT_BLOCKS, data, opts);
     return fromBinary(RootObjectBlocksResponseSchema, raw);
+  }
+
+  // Append a new block to object-1 (root config).
+  // blockContent is raw DSL text; signature covers Time||Data with the connection key.
+  // Requires permissionCreate on object 1 (super role) and server must be master.
+  async rootObjectWrite(blockContent: string, opts?: RequestOptions): Promise<void> {
+    const data = new TextEncoder().encode(blockContent);
+    const time = encodeTime();
+    const payload = new Uint8Array(8 + data.length);
+    payload.set(time, 0); payload.set(data, 8);
+    const signature = signBytes(this.config.signingKeyPriv, payload);
+    const reqData = _encodeRootWriteProto(data, signature, time);
+    await this.request(ROOT_OBJECT_WRITE_INST, reqData, opts);
   }
 
   // ── Internal request/response ───────────────────────────────────────────────
