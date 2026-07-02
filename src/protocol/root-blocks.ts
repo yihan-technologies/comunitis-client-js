@@ -170,12 +170,18 @@ export function parseRootConfig(configString: string): ComunitiStructure {
 
       case 'object.enable': {
         const typeID = p(parts[0]);
-        const obj: ObjectDef = {
-          typeID, name: parts[1] ?? '', isBasic: parts[2] === '1',
-          fields: [], validations: [], servers: [], updateServers: [],
-        };
-        objectIndex.set(typeID, obj);
-        result.objects.push(obj);
+        const existing = objectIndex.get(typeID);
+        if (existing) {
+          existing.name = parts[1] ?? existing.name;
+          existing.isBasic = parts[2] === '1';
+        } else {
+          const obj: ObjectDef = {
+            typeID, name: parts[1] ?? '', isBasic: parts[2] === '1',
+            fields: [], validations: [], servers: [], updateServers: [],
+          };
+          objectIndex.set(typeID, obj);
+          result.objects.push(obj);
+        }
         break;
       }
 
