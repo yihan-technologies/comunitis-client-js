@@ -10,7 +10,139 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file index.proto.
  */
 export const file_index: GenFile = /*@__PURE__*/
-  fileDesc("CgtpbmRleC5wcm90bxIIcHJvdG9pbnQiNgoJQmxvY2tEYXRhEgwKBERhdGEYASABKAwSDQoFSW5kZXgYAiABKA0SDAoERmlsZRgDIAEoDSKBAQoYU3RhdGVNYW5hZ2VyQmFzaWNSZXF1ZXN0EhQKDE9iamVjdFR5cGVJRBgBIAEoDRIRCglTdWJUeXBlSUQYAiABKA0SEgoKTGlua1R5cGVJRBgDIAEoDRIaChJZb3VBcmVTZWNvbmRJbkxpbmUYBCABKAgSDAoEVGVybRgFIAEoBCJsCg5TeW5jQWNrUmVxdWVzdBIxCgVCYXNpYxgBIAEoCzIiLnByb3RvaW50LlN0YXRlTWFuYWdlckJhc2ljUmVxdWVzdBITCgtGaWxlSURJbmRleBgCIAEoDRISCgpBY2tlZEluZGV4GAMgASgNIlUKClNlcnZlckluZm8SCwoDS2V5GAEgASgMEg0KBUxldmVsGAIgASgNEhMKC0ZpbGVJREluZGV4GAMgASgNEhYKDkxhc3RBY2tlZEluZGV4GAQgASgNIkYKEVNlcnZlckxpc3RSZXF1ZXN0EjEKBUJhc2ljGAEgASgLMiIucHJvdG9pbnQuU3RhdGVNYW5hZ2VyQmFzaWNSZXF1ZXN0IjsKElNlcnZlckxpc3RSZXNwb25zZRIlCgdTZXJ2ZXJzGAEgAygLMhQucHJvdG9pbnQuU2VydmVySW5mbyKFAQoXQmxvY2tSYW5nZVZlcmlmeVJlcXVlc3QSMQoFQmFzaWMYASABKAsyIi5wcm90b2ludC5TdGF0ZU1hbmFnZXJCYXNpY1JlcXVlc3QSEwoLRmlsZUlESW5kZXgYAiABKA0SEQoJRnJvbUluZGV4GAMgASgNEg8KB1RvSW5kZXgYBCABKA0iQgoYQmxvY2tSYW5nZVZlcmlmeVJlc3BvbnNlEhEKCVJhbmdlSGFzaBgBIAEoBBITCgtBY3R1YWxDb3VudBgCIAEoDSKQAQodU3RhdGVNYW5hZ2VyTG9hZExhdGVzdFJlcXVlc3QSEwoLRmlsZUlESW5kZXgYASABKA0SGQoRRmlsZUludGVybmFsSW5kZXgYAiABKA0SDAoESGFzaBgDIAEoDBIxCgVCYXNpYxgEIAEoCzIiLnByb3RvaW50LlN0YXRlTWFuYWdlckJhc2ljUmVxdWVzdCJTCh5TdGF0ZU1hbmFnZXJMb2FkTGF0ZXN0UmVzcG9uc2USIwoGQmxvY2tzGAEgAygLMhMucHJvdG9pbnQuQmxvY2tEYXRhEgwKBE1vcmUYAiABKAgiZQoTTWFzdGVyQ2hhbmdlUmVxdWVzdBIxCgVCYXNpYxgBIAEoCzIiLnByb3RvaW50LlN0YXRlTWFuYWdlckJhc2ljUmVxdWVzdBIbChNSZXF1ZXN0ZXJMYXN0VXBkYXRlGAIgASgNIlQKFE1hc3RlckNoYW5nZVJlc3BvbnNlEhAKCEFwcHJvdmVkGAEgASgIEioKDU1pc3NpbmdCbG9ja3MYAiADKAsyEy5wcm90b2ludC5CbG9ja0RhdGEiYwoYTWFzdGVyQ2hhbmdlTm90aWZpY2F0aW9uEjEKBUJhc2ljGAEgASgLMiIucHJvdG9pbnQuU3RhdGVNYW5hZ2VyQmFzaWNSZXF1ZXN0EhQKDE5ld01hc3RlcktleRgCIAEoDCJLChZUcnlCZWNvbWVNYXN0ZXJSZXF1ZXN0EjEKBUJhc2ljGAEgASgLMiIucHJvdG9pbnQuU3RhdGVNYW5hZ2VyQmFzaWNSZXF1ZXN0IpMBChdUcnlCZWNvbWVNYXN0ZXJSZXNwb25zZRIXCg9Jc0FscmVhZHlNYXN0ZXIYASABKAgSFAoMQmVjYW1lTWFzdGVyGAIgASgIEhgKEEN1cnJlbnRNYXN0ZXJLZXkYAyABKAwSFwoPU2VuaW9yU2VydmVyS2V5GAQgASgMEhYKDklzU2VuaW9yU2VydmVyGAUgASgIIkwKB0FkZHJlc3MSCgoCSUQYASABKAkSIgoESW5zdBgCIAEoDjIULnByb3RvaW50LlNpbmdsZUluc3QSEQoJQWRkcmVzc2VzGAMgAygJIjgKEExlYWRlcnNoaXBDaGFuZ2USJAoJbmV3TGVhZGVyGAEgASgLMhEucHJvdG9pbnQuQWRkcmVzcyJjCghUcmFuc2ZlchISCgpDb211bml0aUlEGAEgASgJEhsKA0lOUxgCIAEoDjIOLnByb3RvaW50Lkluc3QSJgoET0JKUxgDIAMoCzIYLnByb3RvaW50LlRyYW5zZmVyU2luZ2xlIoIBCghSZXNwb25zZRIMCgRUaW1lGAEgASgDEgwKBERhdGEYAiABKAwSEQoJU2lnbmF0dXJlGAMgASgMEgsKA0tleRgEIAEoDBIUCgdFcnJDb2RlGAUgASgNSACIAQESEAoDRXJyGBAgASgJSAGIAQFCCgoIX0VyckNvZGVCBgoEX0VyciKpAwoOVHJhbnNmZXJTaW5nbGUSEgoKQ29tdW5pdGlJRBgBIAEoCRIuCgNDVFgYAiADKAsyIS5wcm90b2ludC5UcmFuc2ZlclNpbmdsZS5DVFhFbnRyeRIiCgRJbnN0GAMgASgOMhQucHJvdG9pbnQuU2luZ2xlSW5zdBIRCglSZXF1ZXN0SUQYBCABKAkSDAoERGF0YRgFIAEoDBIRCglTaWduYXR1cmUYByABKAwSCwoDS2V5GAggASgMEgwKBFRpbWUYCSABKAMSFAoHVGltZU91dBgKIAEoBUgAiAEBEiIKB1JldHVybnMYCyADKAsyES5wcm90b2ludC5BZGRyZXNzEikKCVJldHVybkVychgMIAEoCzIRLnByb3RvaW50LkFkZHJlc3NIAYgBARIlCglSZXNwb25zZXMYDSADKAsyEi5wcm90b2ludC5SZXNwb25zZRIOCgZSZXR1cm4YDiABKAgaKgoIQ1RYRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4AUIKCghfVGltZU91dEIMCgpfUmV0dXJuRXJyIjUKFUNyZWF0ZUNvbXVuaXRpSW5pdGlhbBIMCgROYW1lGAEgASgJEg4KBlB1YmxpYxgCIAEoCCJLCh1DcmVhdGVDb211bml0aUluaXRpYWxSZXNwb25zZRIKCgJJRBgBIAEoCRIQCghSb290RGF0YRgCIAEoCRIMCgRTYWx0GAMgASgMIpsCChNDcmVhdGVDb211bml0aUZpbmFsEgwKBFRpbWUYASABKAwSFQoNUm9vdFNpZ25hdHVyZRgCIAEoDBIVCg1BY2NvdW50RmllbGRzGAMgASgMEhkKEUFjY291bnRzU2lnbmF0dXJlGAQgASgMEhEKCUtleUZpZWxkcxgFIAEoDBIUCgxLZXlTaWduYXR1cmUYBiABKAwSDgoGRnJvbUlEGAcgASgMEhgKEFRvT2JqZWN0VHlwZUZyb20YCCABKAwSFgoOVG9PYmplY3RUeXBlVG8YCSABKAwSDAoEVG9JRBgKIAEoDBIaChJsaW5rMVNpZ25hdHVyZUZyb20YCyABKAwSGAoQbGluazFTaWduYXR1cmVUbxgMIAEoDCI2ChZDcmVhdGVDb211bml0aVJlc3BvbnNlEgoKAklEGAEgASgJEhAKCFJvb3REYXRhGAMgASgJIrcCChFOZXR3b3JrQ3JlZGVudGlhbBIMCgROYW1lGAEgASgJEhEKCU5ldHdvcmtJRBgCIAEoCRIUCgxEaXNjb3ZlcnlLZXkYAyABKAkSCwoDUFNLGAQgASgMEhYKDlJvb3RDb211bml0aUlEGAUgASgJEhEKCUFkZHJlc3NlcxgGIAMoCRIPCgdEZWxldGVkGAcgASgIEhEKCUNsaWVudFBTSxgIIAEoDBIaChJDbGllbnREaXNjb3ZlcnlLZXkYCSABKAkSFQoNU2VydmVyVENQUG9ydBgKIAEoDRIVCg1TZXJ2ZXJVRFBQb3J0GAsgASgNEhUKDUNsaWVudFRDUFBvcnQYDCABKA0SGAoQQ2xpZW50V2ViUlRDUG9ydBgNIAEoDRIUCgxDbGllbnRXVFBvcnQYDiABKA0ilgEKCEJvb3REYXRhEhQKDERvbnRTYXZlUGFzcxgBIAEoCBITCgZQdWJLZXkYAyABKAxIAIgBARIUCgdQcml2S2V5GAQgASgMSAGIAQESLAoHTmV0d29yaxgFIAEoCzIbLnByb3RvaW50Lk5ldHdvcmtDcmVkZW50aWFsQgkKB19QdWJLZXlCCgoIX1ByaXZLZXlKBAgCEAMitgYKDUtleUZpbGVVcGRhdGUSLwoKU2V0TmV0d29yaxgBIAEoCzIbLnByb3RvaW50Lk5ldHdvcmtDcmVkZW50aWFsEhQKDEFkZEFkZHJlc3NlcxgCIAMoCRIXCg9SZW1vdmVBZGRyZXNzZXMYAyADKAkSGQoMVXBkYXRlUHViS2V5GAQgASgMSACIAQESGgoNVXBkYXRlUHJpdktleRgFIAEoDEgBiAEBEhkKDFNldE5ldHdvcmtJRBgGIAEoCUgCiAEBEh4KEVNldFJvb3RDb211bml0aUlEGAcgASgJSAOIAQESGwoOU2V0TmV0d29ya05hbWUYCCABKAlIBIgBARIcCg9TZXREaXNjb3ZlcnlLZXkYCSABKAlIBYgBARITCgZTZXRQU0sYCiABKAxIBogBARIVCg1EZWxldGVOZXR3b3JrGAsgASgIEhkKDFNldENsaWVudFBTSxgMIAEoDEgHiAEBEiIKFVNldENsaWVudERpc2NvdmVyeUtleRgNIAEoCUgIiAEBEh0KEFNldFNlcnZlclRDUFBvcnQYDiABKA1ICYgBARIdChBTZXRTZXJ2ZXJVRFBQb3J0GA8gASgNSAqIAQESHQoQU2V0Q2xpZW50VENQUG9ydBgQIAEoDUgLiAEBEiAKE1NldENsaWVudFdlYlJUQ1BvcnQYESABKA1IDIgBARIcCg9TZXRDbGllbnRXVFBvcnQYEiABKA1IDYgBAUIPCg1fVXBkYXRlUHViS2V5QhAKDl9VcGRhdGVQcml2S2V5Qg8KDV9TZXROZXR3b3JrSURCFAoSX1NldFJvb3RDb211bml0aUlEQhEKD19TZXROZXR3b3JrTmFtZUISChBfU2V0RGlzY292ZXJ5S2V5QgkKB19TZXRQU0tCDwoNX1NldENsaWVudFBTS0IYChZfU2V0Q2xpZW50RGlzY292ZXJ5S2V5QhMKEV9TZXRTZXJ2ZXJUQ1BQb3J0QhMKEV9TZXRTZXJ2ZXJVRFBQb3J0QhMKEV9TZXRDbGllbnRUQ1BQb3J0QhYKFF9TZXRDbGllbnRXZWJSVENQb3J0QhIKEF9TZXRDbGllbnRXVFBvcnQiGAoIQm9vdFBhc3MSDAoEUGFzcxgBIAEoDCI5Cg1Xcml0ZVJlc3BvbnNlEgsKA1R5cBgBIAEoDRINCgVPYmpJRBgCIAEoBBIMCgREYXRhGAMgASgMIosDCgpCYXRjaEVudHJ5EhkKDE9iamVjdFR5cGVJRBgBIAEoDUgAiAEBEhUKCE9iamVjdElEGAIgASgESAGIAQESFwoKTGlua1R5cGVJRBgDIAEoDUgCiAEBEhcKCkZyb21UeXBlSUQYBCABKA1IA4gBARITCgZGcm9tSUQYBSABKARIBIgBARITCgZUb1R5cGUYBiABKA1IBYgBARIRCgRUb0lEGAcgASgESAaIAQESDAoEVGltZRgIIAEoDBIOCgZGaWVsZHMYCSABKAwSEQoJU2lnbmF0dXJlGAogASgMEhEKCVNpZ25LZXlJRBgLIAEoBBIvCglEaXJlY3Rpb24YDCABKA4yFy5wcm90b2ludC5MaW5rRGlyZWN0aW9uSAeIAQFCDwoNX09iamVjdFR5cGVJREILCglfT2JqZWN0SURCDQoLX0xpbmtUeXBlSURCDQoLX0Zyb21UeXBlSURCCQoHX0Zyb21JREIJCgdfVG9UeXBlQgcKBV9Ub0lEQgwKCl9EaXJlY3Rpb24iUAoRQmF0Y2hFbnRyeVJlcXVlc3QSJQoHRW50cmllcxgBIAMoCzIULnByb3RvaW50LkJhdGNoRW50cnkSFAoMRHVyYWJsZVdyaXRlGAIgASgIIqoBChJCYXRjaEVudHJ5UmVzcG9uc2USDQoFSW5kZXgYASABKA0SJQoGU3RhdHVzGAIgASgOMhUucHJvdG9pbnQuRW50cnlTdGF0dXMSFQoIT2JqZWN0SUQYAyABKARIAIgBARIUCgdFcnJDb2RlGAQgASgNSAGIAQESEAoDRXJyGAUgASgJSAKIAQFCCwoJX09iamVjdElEQgoKCF9FcnJDb2RlQgYKBF9FcnIiSQoWQmF0Y2hFbnRyeVJlc3BvbnNlTGlzdBIvCglSZXNwb25zZXMYASADKAsyHC5wcm90b2ludC5CYXRjaEVudHJ5UmVzcG9uc2UiQwoRR3JhcGhRdWVyeVJlcXVlc3QSDQoFUXVlcnkYASABKAkSDQoFS2V5SUQYAiABKAQSEAoITWluSW5kZXgYAyABKA0iXgoSR3JhcGhRdWVyeVJlc3BvbnNlEgwKBERhdGEYASABKAwSFAoHRXJyQ29kZRgCIAEoDUgAiAEBEhAKA0VychgDIAEoCUgBiAEBQgoKCF9FcnJDb2RlQgYKBF9FcnIiSQoXUm9vdE9iamVjdEJsb2Nrc1JlcXVlc3QSEwoLRmlsZUlESW5kZXgYASABKA0SGQoRRmlsZUludGVybmFsSW5kZXgYAiABKA0iVQoNUm9vdEJsb2NrRGF0YRIMCgREYXRhGAEgASgMEhUKDUdsb2JhbEJsb2NrSUQYAiABKA0SDAoERmlsZRgDIAEoDRIRCglGaWxlSW5kZXgYBCABKA0iiQEKGFJvb3RPYmplY3RCbG9ja3NSZXNwb25zZRInCgZCbG9ja3MYASADKAsyFy5wcm90b2ludC5Sb290QmxvY2tEYXRhEgwKBE1vcmUYAiABKAgSFwoPTmV4dEZpbGVJREluZGV4GAMgASgNEh0KFU5leHRGaWxlSW50ZXJuYWxJbmRleBgEIAEoDSJHChZSb290T2JqZWN0V3JpdGVSZXF1ZXN0EgwKBERhdGEYASABKAwSEQoJU2lnbmF0dXJlGAIgASgMEgwKBFRpbWUYAyABKAwqGgoESW5zdBIICgROT05FEAASCAoEU1lOQxABKt8ECgpTaW5nbGVJbnN0EhgKFENSRUFURV9DT01VTklUSV9JTklUEAASGQoVQ1JFQVRFX0NPTVVOSVRJX0ZJTkFMEAESFQoRTEVBREVSU0hJUF9DSEFOR0UQAhINCglIRUFSVEJFQVQQAxIgChxTVEFURV9NQU5BR0VSX0FSRV9ZT1VfTUFTVEVSEAUSIQodU1RBVEVfTUFOQUdFUl9JX0FNX05PV19NQVNURVIQBhIkCiBTVEFURV9NQU5BR0VSX0xPQURfTEFURVNUX0JMT0NLUxAHEiEKHVNUQVRFX01BTkFHRVJfVEhFUkVfSVNfVVBEQVRFEAgSGQoVU1RBVEVfTUFOQUdFUl9BRERfTkVXEAkSJwojU1RBVEVfTUFOQUdFUl9SRVFVRVNUX01BU1RFUl9DSEFOR0UQChIsCihTVEFURV9NQU5BR0VSX01BU1RFUl9DSEFOR0VfTk9USUZJQ0FUSU9OEAsSIwofU1RBVEVfTUFOQUdFUl9UUllfQkVDT01FX01BU1RFUhAMEg8KC0JBVENIX0VOVFJZEA0SDwoLR1JBUEhfUVVFUlkQDhITCg9FWFBSRVNTSU9OX0NBTEwQDxIaChZTVEFURV9NQU5BR0VSX1NZTkNfQUNLEBASHQoZU1RBVEVfTUFOQUdFUl9TRVJWRVJfTElTVBAREh4KGlNUQVRFX01BTkFHRVJfVkVSSUZZX1JBTkdFEBISEAoMU0VSVkVSX1NUQVRTEBMSFgoSUk9PVF9PQkpFQ1RfQkxPQ0tTEBQSFQoRUk9PVF9PQkpFQ1RfV1JJVEUQFSo/Cg1MaW5rRGlyZWN0aW9uEhcKE0xJTktfRElSRUNUSU9OX0ZST00QABIVChFMSU5LX0RJUkVDVElPTl9UTxABKl4KC0VudHJ5U3RhdHVzEhgKFEVOVFJZX1NUQVRVU19TVUNDRVNTEAASFwoTRU5UUllfU1RBVFVTX0ZBSUxFRBABEhwKGEVOVFJZX1NUQVRVU19VTlBST0NFU1NFRBACQjJaMGdpdGh1Yi5jb20veWloYW4tdGVjaG5vbG9naWVzL2NvbXVuaXRpcy9wcm90b2ludGIGcHJvdG8z");
+  fileDesc("CgtpbmRleC5wcm90bxIIcHJvdG9pbnQi0gEKHEFjY291bnRLZXlTZWxmU2VydmljZVJlcXVlc3QSEQoJQWNjb3VudElEGAEgASgEEjUKBkFjdGlvbhgCIAEoDjIlLnByb3RvaW50LkFjY291bnRLZXlTZWxmU2VydmljZUFjdGlvbhIRCglOZXdQdWJLZXkYAyABKAwSEwoLVGFyZ2V0S2V5SUQYBCABKAQSFgoOUGVybWlzc2lvblNwZWMYBSABKAkSEQoJSXNQcml2YXRlGAYgASgIEhUKDUFjY291bnRLZXlTaWcYByABKAwiUwoOQWNjb3VudEtleUluZm8SDQoFS2V5SUQYASABKAQSDgoGUHViS2V5GAIgASgJEhAKCFBlcm1TcGVjGAMgASgJEhAKCERpc2FibGVkGAQgASgIImMKE0FjY291bnRJbmZvUmVzcG9uc2USEQoJQWNjb3VudElEGAEgASgEEhEKCUlzUHJpdmF0ZRgCIAEoCBImCgRLZXlzGAMgAygLMhgucHJvdG9pbnQuQWNjb3VudEtleUluZm8iNgoJQmxvY2tEYXRhEgwKBERhdGEYASABKAwSDQoFSW5kZXgYAiABKA0SDAoERmlsZRgDIAEoDSKBAQoYU3RhdGVNYW5hZ2VyQmFzaWNSZXF1ZXN0EhQKDE9iamVjdFR5cGVJRBgBIAEoDRIRCglTdWJUeXBlSUQYAiABKA0SEgoKTGlua1R5cGVJRBgDIAEoDRIaChJZb3VBcmVTZWNvbmRJbkxpbmUYBCABKAgSDAoEVGVybRgFIAEoBCJsCg5TeW5jQWNrUmVxdWVzdBIxCgVCYXNpYxgBIAEoCzIiLnByb3RvaW50LlN0YXRlTWFuYWdlckJhc2ljUmVxdWVzdBITCgtGaWxlSURJbmRleBgCIAEoDRISCgpBY2tlZEluZGV4GAMgASgNIlUKClNlcnZlckluZm8SCwoDS2V5GAEgASgMEg0KBUxldmVsGAIgASgNEhMKC0ZpbGVJREluZGV4GAMgASgNEhYKDkxhc3RBY2tlZEluZGV4GAQgASgNIkYKEVNlcnZlckxpc3RSZXF1ZXN0EjEKBUJhc2ljGAEgASgLMiIucHJvdG9pbnQuU3RhdGVNYW5hZ2VyQmFzaWNSZXF1ZXN0IjsKElNlcnZlckxpc3RSZXNwb25zZRIlCgdTZXJ2ZXJzGAEgAygLMhQucHJvdG9pbnQuU2VydmVySW5mbyKFAQoXQmxvY2tSYW5nZVZlcmlmeVJlcXVlc3QSMQoFQmFzaWMYASABKAsyIi5wcm90b2ludC5TdGF0ZU1hbmFnZXJCYXNpY1JlcXVlc3QSEwoLRmlsZUlESW5kZXgYAiABKA0SEQoJRnJvbUluZGV4GAMgASgNEg8KB1RvSW5kZXgYBCABKA0iQgoYQmxvY2tSYW5nZVZlcmlmeVJlc3BvbnNlEhEKCVJhbmdlSGFzaBgBIAEoBBITCgtBY3R1YWxDb3VudBgCIAEoDSKQAQodU3RhdGVNYW5hZ2VyTG9hZExhdGVzdFJlcXVlc3QSEwoLRmlsZUlESW5kZXgYASABKA0SGQoRRmlsZUludGVybmFsSW5kZXgYAiABKA0SDAoESGFzaBgDIAEoDBIxCgVCYXNpYxgEIAEoCzIiLnByb3RvaW50LlN0YXRlTWFuYWdlckJhc2ljUmVxdWVzdCJTCh5TdGF0ZU1hbmFnZXJMb2FkTGF0ZXN0UmVzcG9uc2USIwoGQmxvY2tzGAEgAygLMhMucHJvdG9pbnQuQmxvY2tEYXRhEgwKBE1vcmUYAiABKAgiZQoTTWFzdGVyQ2hhbmdlUmVxdWVzdBIxCgVCYXNpYxgBIAEoCzIiLnByb3RvaW50LlN0YXRlTWFuYWdlckJhc2ljUmVxdWVzdBIbChNSZXF1ZXN0ZXJMYXN0VXBkYXRlGAIgASgNIlQKFE1hc3RlckNoYW5nZVJlc3BvbnNlEhAKCEFwcHJvdmVkGAEgASgIEioKDU1pc3NpbmdCbG9ja3MYAiADKAsyEy5wcm90b2ludC5CbG9ja0RhdGEiYwoYTWFzdGVyQ2hhbmdlTm90aWZpY2F0aW9uEjEKBUJhc2ljGAEgASgLMiIucHJvdG9pbnQuU3RhdGVNYW5hZ2VyQmFzaWNSZXF1ZXN0EhQKDE5ld01hc3RlcktleRgCIAEoDCJLChZUcnlCZWNvbWVNYXN0ZXJSZXF1ZXN0EjEKBUJhc2ljGAEgASgLMiIucHJvdG9pbnQuU3RhdGVNYW5hZ2VyQmFzaWNSZXF1ZXN0IpMBChdUcnlCZWNvbWVNYXN0ZXJSZXNwb25zZRIXCg9Jc0FscmVhZHlNYXN0ZXIYASABKAgSFAoMQmVjYW1lTWFzdGVyGAIgASgIEhgKEEN1cnJlbnRNYXN0ZXJLZXkYAyABKAwSFwoPU2VuaW9yU2VydmVyS2V5GAQgASgMEhYKDklzU2VuaW9yU2VydmVyGAUgASgIIkwKB0FkZHJlc3MSCgoCSUQYASABKAkSIgoESW5zdBgCIAEoDjIULnByb3RvaW50LlNpbmdsZUluc3QSEQoJQWRkcmVzc2VzGAMgAygJIjgKEExlYWRlcnNoaXBDaGFuZ2USJAoJbmV3TGVhZGVyGAEgASgLMhEucHJvdG9pbnQuQWRkcmVzcyJjCghUcmFuc2ZlchISCgpDb211bml0aUlEGAEgASgJEhsKA0lOUxgCIAEoDjIOLnByb3RvaW50Lkluc3QSJgoET0JKUxgDIAMoCzIYLnByb3RvaW50LlRyYW5zZmVyU2luZ2xlIoIBCghSZXNwb25zZRIMCgRUaW1lGAEgASgDEgwKBERhdGEYAiABKAwSEQoJU2lnbmF0dXJlGAMgASgMEgsKA0tleRgEIAEoDBIUCgdFcnJDb2RlGAUgASgNSACIAQESEAoDRXJyGBAgASgJSAGIAQFCCgoIX0VyckNvZGVCBgoEX0VyciKpAwoOVHJhbnNmZXJTaW5nbGUSEgoKQ29tdW5pdGlJRBgBIAEoCRIuCgNDVFgYAiADKAsyIS5wcm90b2ludC5UcmFuc2ZlclNpbmdsZS5DVFhFbnRyeRIiCgRJbnN0GAMgASgOMhQucHJvdG9pbnQuU2luZ2xlSW5zdBIRCglSZXF1ZXN0SUQYBCABKAkSDAoERGF0YRgFIAEoDBIRCglTaWduYXR1cmUYByABKAwSCwoDS2V5GAggASgMEgwKBFRpbWUYCSABKAMSFAoHVGltZU91dBgKIAEoBUgAiAEBEiIKB1JldHVybnMYCyADKAsyES5wcm90b2ludC5BZGRyZXNzEikKCVJldHVybkVychgMIAEoCzIRLnByb3RvaW50LkFkZHJlc3NIAYgBARIlCglSZXNwb25zZXMYDSADKAsyEi5wcm90b2ludC5SZXNwb25zZRIOCgZSZXR1cm4YDiABKAgaKgoIQ1RYRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4AUIKCghfVGltZU91dEIMCgpfUmV0dXJuRXJyIjUKFUNyZWF0ZUNvbXVuaXRpSW5pdGlhbBIMCgROYW1lGAEgASgJEg4KBlB1YmxpYxgCIAEoCCJLCh1DcmVhdGVDb211bml0aUluaXRpYWxSZXNwb25zZRIKCgJJRBgBIAEoCRIQCghSb290RGF0YRgCIAEoCRIMCgRTYWx0GAMgASgMIpsCChNDcmVhdGVDb211bml0aUZpbmFsEgwKBFRpbWUYASABKAwSFQoNUm9vdFNpZ25hdHVyZRgCIAEoDBIVCg1BY2NvdW50RmllbGRzGAMgASgMEhkKEUFjY291bnRzU2lnbmF0dXJlGAQgASgMEhEKCUtleUZpZWxkcxgFIAEoDBIUCgxLZXlTaWduYXR1cmUYBiABKAwSDgoGRnJvbUlEGAcgASgMEhgKEFRvT2JqZWN0VHlwZUZyb20YCCABKAwSFgoOVG9PYmplY3RUeXBlVG8YCSABKAwSDAoEVG9JRBgKIAEoDBIaChJsaW5rMVNpZ25hdHVyZUZyb20YCyABKAwSGAoQbGluazFTaWduYXR1cmVUbxgMIAEoDCI2ChZDcmVhdGVDb211bml0aVJlc3BvbnNlEgoKAklEGAEgASgJEhAKCFJvb3REYXRhGAMgASgJIrcCChFOZXR3b3JrQ3JlZGVudGlhbBIMCgROYW1lGAEgASgJEhEKCU5ldHdvcmtJRBgCIAEoCRIUCgxEaXNjb3ZlcnlLZXkYAyABKAkSCwoDUFNLGAQgASgMEhYKDlJvb3RDb211bml0aUlEGAUgASgJEhEKCUFkZHJlc3NlcxgGIAMoCRIPCgdEZWxldGVkGAcgASgIEhEKCUNsaWVudFBTSxgIIAEoDBIaChJDbGllbnREaXNjb3ZlcnlLZXkYCSABKAkSFQoNU2VydmVyVENQUG9ydBgKIAEoDRIVCg1TZXJ2ZXJVRFBQb3J0GAsgASgNEhUKDUNsaWVudFRDUFBvcnQYDCABKA0SGAoQQ2xpZW50V2ViUlRDUG9ydBgNIAEoDRIUCgxDbGllbnRXVFBvcnQYDiABKA0ilgEKCEJvb3REYXRhEhQKDERvbnRTYXZlUGFzcxgBIAEoCBITCgZQdWJLZXkYAyABKAxIAIgBARIUCgdQcml2S2V5GAQgASgMSAGIAQESLAoHTmV0d29yaxgFIAEoCzIbLnByb3RvaW50Lk5ldHdvcmtDcmVkZW50aWFsQgkKB19QdWJLZXlCCgoIX1ByaXZLZXlKBAgCEAMitgYKDUtleUZpbGVVcGRhdGUSLwoKU2V0TmV0d29yaxgBIAEoCzIbLnByb3RvaW50Lk5ldHdvcmtDcmVkZW50aWFsEhQKDEFkZEFkZHJlc3NlcxgCIAMoCRIXCg9SZW1vdmVBZGRyZXNzZXMYAyADKAkSGQoMVXBkYXRlUHViS2V5GAQgASgMSACIAQESGgoNVXBkYXRlUHJpdktleRgFIAEoDEgBiAEBEhkKDFNldE5ldHdvcmtJRBgGIAEoCUgCiAEBEh4KEVNldFJvb3RDb211bml0aUlEGAcgASgJSAOIAQESGwoOU2V0TmV0d29ya05hbWUYCCABKAlIBIgBARIcCg9TZXREaXNjb3ZlcnlLZXkYCSABKAlIBYgBARITCgZTZXRQU0sYCiABKAxIBogBARIVCg1EZWxldGVOZXR3b3JrGAsgASgIEhkKDFNldENsaWVudFBTSxgMIAEoDEgHiAEBEiIKFVNldENsaWVudERpc2NvdmVyeUtleRgNIAEoCUgIiAEBEh0KEFNldFNlcnZlclRDUFBvcnQYDiABKA1ICYgBARIdChBTZXRTZXJ2ZXJVRFBQb3J0GA8gASgNSAqIAQESHQoQU2V0Q2xpZW50VENQUG9ydBgQIAEoDUgLiAEBEiAKE1NldENsaWVudFdlYlJUQ1BvcnQYESABKA1IDIgBARIcCg9TZXRDbGllbnRXVFBvcnQYEiABKA1IDYgBAUIPCg1fVXBkYXRlUHViS2V5QhAKDl9VcGRhdGVQcml2S2V5Qg8KDV9TZXROZXR3b3JrSURCFAoSX1NldFJvb3RDb211bml0aUlEQhEKD19TZXROZXR3b3JrTmFtZUISChBfU2V0RGlzY292ZXJ5S2V5QgkKB19TZXRQU0tCDwoNX1NldENsaWVudFBTS0IYChZfU2V0Q2xpZW50RGlzY292ZXJ5S2V5QhMKEV9TZXRTZXJ2ZXJUQ1BQb3J0QhMKEV9TZXRTZXJ2ZXJVRFBQb3J0QhMKEV9TZXRDbGllbnRUQ1BQb3J0QhYKFF9TZXRDbGllbnRXZWJSVENQb3J0QhIKEF9TZXRDbGllbnRXVFBvcnQiGAoIQm9vdFBhc3MSDAoEUGFzcxgBIAEoDCI5Cg1Xcml0ZVJlc3BvbnNlEgsKA1R5cBgBIAEoDRINCgVPYmpJRBgCIAEoBBIMCgREYXRhGAMgASgMIosDCgpCYXRjaEVudHJ5EhkKDE9iamVjdFR5cGVJRBgBIAEoDUgAiAEBEhUKCE9iamVjdElEGAIgASgESAGIAQESFwoKTGlua1R5cGVJRBgDIAEoDUgCiAEBEhcKCkZyb21UeXBlSUQYBCABKA1IA4gBARITCgZGcm9tSUQYBSABKARIBIgBARITCgZUb1R5cGUYBiABKA1IBYgBARIRCgRUb0lEGAcgASgESAaIAQESDAoEVGltZRgIIAEoDBIOCgZGaWVsZHMYCSABKAwSEQoJU2lnbmF0dXJlGAogASgMEhEKCVNpZ25LZXlJRBgLIAEoBBIvCglEaXJlY3Rpb24YDCABKA4yFy5wcm90b2ludC5MaW5rRGlyZWN0aW9uSAeIAQFCDwoNX09iamVjdFR5cGVJREILCglfT2JqZWN0SURCDQoLX0xpbmtUeXBlSURCDQoLX0Zyb21UeXBlSURCCQoHX0Zyb21JREIJCgdfVG9UeXBlQgcKBV9Ub0lEQgwKCl9EaXJlY3Rpb24iUAoRQmF0Y2hFbnRyeVJlcXVlc3QSJQoHRW50cmllcxgBIAMoCzIULnByb3RvaW50LkJhdGNoRW50cnkSFAoMRHVyYWJsZVdyaXRlGAIgASgIIqoBChJCYXRjaEVudHJ5UmVzcG9uc2USDQoFSW5kZXgYASABKA0SJQoGU3RhdHVzGAIgASgOMhUucHJvdG9pbnQuRW50cnlTdGF0dXMSFQoIT2JqZWN0SUQYAyABKARIAIgBARIUCgdFcnJDb2RlGAQgASgNSAGIAQESEAoDRXJyGAUgASgJSAKIAQFCCwoJX09iamVjdElEQgoKCF9FcnJDb2RlQgYKBF9FcnIiSQoWQmF0Y2hFbnRyeVJlc3BvbnNlTGlzdBIvCglSZXNwb25zZXMYASADKAsyHC5wcm90b2ludC5CYXRjaEVudHJ5UmVzcG9uc2UiQwoRR3JhcGhRdWVyeVJlcXVlc3QSDQoFUXVlcnkYASABKAkSDQoFS2V5SUQYAiABKAQSEAoITWluSW5kZXgYAyABKA0iXgoSR3JhcGhRdWVyeVJlc3BvbnNlEgwKBERhdGEYASABKAwSFAoHRXJyQ29kZRgCIAEoDUgAiAEBEhAKA0VychgDIAEoCUgBiAEBQgoKCF9FcnJDb2RlQgYKBF9FcnIiSQoXUm9vdE9iamVjdEJsb2Nrc1JlcXVlc3QSEwoLRmlsZUlESW5kZXgYASABKA0SGQoRRmlsZUludGVybmFsSW5kZXgYAiABKA0iVQoNUm9vdEJsb2NrRGF0YRIMCgREYXRhGAEgASgMEhUKDUdsb2JhbEJsb2NrSUQYAiABKA0SDAoERmlsZRgDIAEoDRIRCglGaWxlSW5kZXgYBCABKA0iiQEKGFJvb3RPYmplY3RCbG9ja3NSZXNwb25zZRInCgZCbG9ja3MYASADKAsyFy5wcm90b2ludC5Sb290QmxvY2tEYXRhEgwKBE1vcmUYAiABKAgSFwoPTmV4dEZpbGVJREluZGV4GAMgASgNEh0KFU5leHRGaWxlSW50ZXJuYWxJbmRleBgEIAEoDSJHChZSb290T2JqZWN0V3JpdGVSZXF1ZXN0EgwKBERhdGEYASABKAwSEQoJU2lnbmF0dXJlGAIgASgMEgwKBFRpbWUYAyABKAwqGgoESW5zdBIICgROT05FEAASCAoEU1lOQxABKo8FCgpTaW5nbGVJbnN0EhgKFENSRUFURV9DT01VTklUSV9JTklUEAASGQoVQ1JFQVRFX0NPTVVOSVRJX0ZJTkFMEAESFQoRTEVBREVSU0hJUF9DSEFOR0UQAhINCglIRUFSVEJFQVQQAxIgChxTVEFURV9NQU5BR0VSX0FSRV9ZT1VfTUFTVEVSEAUSIQodU1RBVEVfTUFOQUdFUl9JX0FNX05PV19NQVNURVIQBhIkCiBTVEFURV9NQU5BR0VSX0xPQURfTEFURVNUX0JMT0NLUxAHEiEKHVNUQVRFX01BTkFHRVJfVEhFUkVfSVNfVVBEQVRFEAgSGQoVU1RBVEVfTUFOQUdFUl9BRERfTkVXEAkSJwojU1RBVEVfTUFOQUdFUl9SRVFVRVNUX01BU1RFUl9DSEFOR0UQChIsCihTVEFURV9NQU5BR0VSX01BU1RFUl9DSEFOR0VfTk9USUZJQ0FUSU9OEAsSIwofU1RBVEVfTUFOQUdFUl9UUllfQkVDT01FX01BU1RFUhAMEg8KC0JBVENIX0VOVFJZEA0SDwoLR1JBUEhfUVVFUlkQDhITCg9FWFBSRVNTSU9OX0NBTEwQDxIaChZTVEFURV9NQU5BR0VSX1NZTkNfQUNLEBASHQoZU1RBVEVfTUFOQUdFUl9TRVJWRVJfTElTVBAREh4KGlNUQVRFX01BTkFHRVJfVkVSSUZZX1JBTkdFEBISEAoMU0VSVkVSX1NUQVRTEBMSFgoSUk9PVF9PQkpFQ1RfQkxPQ0tTEBQSFQoRUk9PVF9PQkpFQ1RfV1JJVEUQFRIcChhBQ0NPVU5UX0tFWV9TRUxGX1NFUlZJQ0UQFhIQCgxBQ0NPVU5UX0lORk8QFyp2ChtBY2NvdW50S2V5U2VsZlNlcnZpY2VBY3Rpb24SEwoPQUtfQUNUSU9OX1VOU0VUEAASEQoNQUtfQUREX1BVQktFWRABEhgKFEFLX1VQREFURV9QRVJNSVNTSU9OEAISFQoRQUtfRElTQUJMRV9QVUJLRVkQAyo/Cg1MaW5rRGlyZWN0aW9uEhcKE0xJTktfRElSRUNUSU9OX0ZST00QABIVChFMSU5LX0RJUkVDVElPTl9UTxABKl4KC0VudHJ5U3RhdHVzEhgKFEVOVFJZX1NUQVRVU19TVUNDRVNTEAASFwoTRU5UUllfU1RBVFVTX0ZBSUxFRBABEhwKGEVOVFJZX1NUQVRVU19VTlBST0NFU1NFRBACQjJaMGdpdGh1Yi5jb20veWloYW4tdGVjaG5vbG9naWVzL2NvbXVuaXRpcy9wcm90b2ludGIGcHJvdG8z");
+
+/**
+ * AccountKeySelfServiceRequest is the Data payload of an ACCOUNT_KEY_SELF_SERVICE
+ * TransferSingle. The outer TransferSingle.Key is the raw Ed25519 account key;
+ * the outer Signature covers RequestID+Time+Data as usual.
+ *
+ * @generated from message protoint.AccountKeySelfServiceRequest
+ */
+export type AccountKeySelfServiceRequest = Message<"protoint.AccountKeySelfServiceRequest"> & {
+  /**
+   * @generated from field: uint64 AccountID = 1;
+   */
+  AccountID: bigint;
+
+  /**
+   * @generated from field: protoint.AccountKeySelfServiceAction Action = 2;
+   */
+  Action: AccountKeySelfServiceAction;
+
+  /**
+   * AK_ADD_PUBKEY: raw 32-byte Ed25519 key
+   *
+   * @generated from field: bytes NewPubKey = 3;
+   */
+  NewPubKey: Uint8Array;
+
+  /**
+   * AK_UPDATE_PERMISSION / AK_DISABLE_PUBKEY
+   *
+   * @generated from field: uint64 TargetKeyID = 4;
+   */
+  TargetKeyID: bigint;
+
+  /**
+   * AK_UPDATE_PERMISSION: newline-separated spec
+   *
+   * @generated from field: string PermissionSpec = 5;
+   */
+  PermissionSpec: string;
+
+  /**
+   * true=use saltPrivate, false=use saltPublic
+   *
+   * @generated from field: bool IsPrivate = 6;
+   */
+  IsPrivate: boolean;
+
+  /**
+   * inner sig over canonical action payload (see buildInnerSigPayload)
+   *
+   * @generated from field: bytes AccountKeySig = 7;
+   */
+  AccountKeySig: Uint8Array;
+};
+
+/**
+ * Describes the message protoint.AccountKeySelfServiceRequest.
+ * Use `create(AccountKeySelfServiceRequestSchema)` to create a new message.
+ */
+export const AccountKeySelfServiceRequestSchema: GenMessage<AccountKeySelfServiceRequest> = /*@__PURE__*/
+  messageDesc(file_index, 0);
+
+/**
+ * AccountKeyInfo describes a single signing key linked to an account.
+ *
+ * @generated from message protoint.AccountKeyInfo
+ */
+export type AccountKeyInfo = Message<"protoint.AccountKeyInfo"> & {
+  /**
+   * type-3 object ID
+   *
+   * @generated from field: uint64 KeyID = 1;
+   */
+  KeyID: bigint;
+
+  /**
+   * base58-encoded Ed25519 public key
+   *
+   * @generated from field: string PubKey = 2;
+   */
+  PubKey: string;
+
+  /**
+   * permission spec (newline-separated)
+   *
+   * @generated from field: string PermSpec = 3;
+   */
+  PermSpec: string;
+
+  /**
+   * true if the key has been disabled
+   *
+   * @generated from field: bool Disabled = 4;
+   */
+  Disabled: boolean;
+};
+
+/**
+ * Describes the message protoint.AccountKeyInfo.
+ * Use `create(AccountKeyInfoSchema)` to create a new message.
+ */
+export const AccountKeyInfoSchema: GenMessage<AccountKeyInfo> = /*@__PURE__*/
+  messageDesc(file_index, 1);
+
+/**
+ * AccountInfoResponse is the response payload for ACCOUNT_INFO.
+ *
+ * @generated from message protoint.AccountInfoResponse
+ */
+export type AccountInfoResponse = Message<"protoint.AccountInfoResponse"> & {
+  /**
+   * @generated from field: uint64 AccountID = 1;
+   */
+  AccountID: bigint;
+
+  /**
+   * @generated from field: bool IsPrivate = 2;
+   */
+  IsPrivate: boolean;
+
+  /**
+   * @generated from field: repeated protoint.AccountKeyInfo Keys = 3;
+   */
+  Keys: AccountKeyInfo[];
+};
+
+/**
+ * Describes the message protoint.AccountInfoResponse.
+ * Use `create(AccountInfoResponseSchema)` to create a new message.
+ */
+export const AccountInfoResponseSchema: GenMessage<AccountInfoResponse> = /*@__PURE__*/
+  messageDesc(file_index, 2);
 
 /**
  * @generated from message protoint.BlockData
@@ -37,7 +169,7 @@ export type BlockData = Message<"protoint.BlockData"> & {
  * Use `create(BlockDataSchema)` to create a new message.
  */
 export const BlockDataSchema: GenMessage<BlockData> = /*@__PURE__*/
-  messageDesc(file_index, 0);
+  messageDesc(file_index, 3);
 
 /**
  * @generated from message protoint.StateManagerBasicRequest
@@ -76,7 +208,7 @@ export type StateManagerBasicRequest = Message<"protoint.StateManagerBasicReques
  * Use `create(StateManagerBasicRequestSchema)` to create a new message.
  */
 export const StateManagerBasicRequestSchema: GenMessage<StateManagerBasicRequest> = /*@__PURE__*/
-  messageDesc(file_index, 1);
+  messageDesc(file_index, 4);
 
 /**
  * SyncAckRequest is sent by the 2nd server to master after a pull completes.
@@ -107,7 +239,7 @@ export type SyncAckRequest = Message<"protoint.SyncAckRequest"> & {
  * Use `create(SyncAckRequestSchema)` to create a new message.
  */
 export const SyncAckRequestSchema: GenMessage<SyncAckRequest> = /*@__PURE__*/
-  messageDesc(file_index, 2);
+  messageDesc(file_index, 5);
 
 /**
  * ServerInfo describes one replica for client-side read routing.
@@ -145,7 +277,7 @@ export type ServerInfo = Message<"protoint.ServerInfo"> & {
  * Use `create(ServerInfoSchema)` to create a new message.
  */
 export const ServerInfoSchema: GenMessage<ServerInfo> = /*@__PURE__*/
-  messageDesc(file_index, 3);
+  messageDesc(file_index, 6);
 
 /**
  * @generated from message protoint.ServerListRequest
@@ -162,7 +294,7 @@ export type ServerListRequest = Message<"protoint.ServerListRequest"> & {
  * Use `create(ServerListRequestSchema)` to create a new message.
  */
 export const ServerListRequestSchema: GenMessage<ServerListRequest> = /*@__PURE__*/
-  messageDesc(file_index, 4);
+  messageDesc(file_index, 7);
 
 /**
  * @generated from message protoint.ServerListResponse
@@ -179,7 +311,7 @@ export type ServerListResponse = Message<"protoint.ServerListResponse"> & {
  * Use `create(ServerListResponseSchema)` to create a new message.
  */
 export const ServerListResponseSchema: GenMessage<ServerListResponse> = /*@__PURE__*/
-  messageDesc(file_index, 5);
+  messageDesc(file_index, 8);
 
 /**
  * BlockRangeVerifyRequest asks a replica for the hash of blocks [FromIndex..ToIndex].
@@ -213,7 +345,7 @@ export type BlockRangeVerifyRequest = Message<"protoint.BlockRangeVerifyRequest"
  * Use `create(BlockRangeVerifyRequestSchema)` to create a new message.
  */
 export const BlockRangeVerifyRequestSchema: GenMessage<BlockRangeVerifyRequest> = /*@__PURE__*/
-  messageDesc(file_index, 6);
+  messageDesc(file_index, 9);
 
 /**
  * BlockRangeVerifyResponse carries the XOR-combined xxhash64 of each block's CurrentHash.
@@ -241,7 +373,7 @@ export type BlockRangeVerifyResponse = Message<"protoint.BlockRangeVerifyRespons
  * Use `create(BlockRangeVerifyResponseSchema)` to create a new message.
  */
 export const BlockRangeVerifyResponseSchema: GenMessage<BlockRangeVerifyResponse> = /*@__PURE__*/
-  messageDesc(file_index, 7);
+  messageDesc(file_index, 10);
 
 /**
  * @generated from message protoint.StateManagerLoadLatestRequest
@@ -273,7 +405,7 @@ export type StateManagerLoadLatestRequest = Message<"protoint.StateManagerLoadLa
  * Use `create(StateManagerLoadLatestRequestSchema)` to create a new message.
  */
 export const StateManagerLoadLatestRequestSchema: GenMessage<StateManagerLoadLatestRequest> = /*@__PURE__*/
-  messageDesc(file_index, 8);
+  messageDesc(file_index, 11);
 
 /**
  * @generated from message protoint.StateManagerLoadLatestResponse
@@ -295,7 +427,7 @@ export type StateManagerLoadLatestResponse = Message<"protoint.StateManagerLoadL
  * Use `create(StateManagerLoadLatestResponseSchema)` to create a new message.
  */
 export const StateManagerLoadLatestResponseSchema: GenMessage<StateManagerLoadLatestResponse> = /*@__PURE__*/
-  messageDesc(file_index, 9);
+  messageDesc(file_index, 12);
 
 /**
  * @generated from message protoint.MasterChangeRequest
@@ -317,7 +449,7 @@ export type MasterChangeRequest = Message<"protoint.MasterChangeRequest"> & {
  * Use `create(MasterChangeRequestSchema)` to create a new message.
  */
 export const MasterChangeRequestSchema: GenMessage<MasterChangeRequest> = /*@__PURE__*/
-  messageDesc(file_index, 10);
+  messageDesc(file_index, 13);
 
 /**
  * @generated from message protoint.MasterChangeResponse
@@ -339,7 +471,7 @@ export type MasterChangeResponse = Message<"protoint.MasterChangeResponse"> & {
  * Use `create(MasterChangeResponseSchema)` to create a new message.
  */
 export const MasterChangeResponseSchema: GenMessage<MasterChangeResponse> = /*@__PURE__*/
-  messageDesc(file_index, 11);
+  messageDesc(file_index, 14);
 
 /**
  * @generated from message protoint.MasterChangeNotification
@@ -361,7 +493,7 @@ export type MasterChangeNotification = Message<"protoint.MasterChangeNotificatio
  * Use `create(MasterChangeNotificationSchema)` to create a new message.
  */
 export const MasterChangeNotificationSchema: GenMessage<MasterChangeNotification> = /*@__PURE__*/
-  messageDesc(file_index, 12);
+  messageDesc(file_index, 15);
 
 /**
  * @generated from message protoint.TryBecomeMasterRequest
@@ -378,7 +510,7 @@ export type TryBecomeMasterRequest = Message<"protoint.TryBecomeMasterRequest"> 
  * Use `create(TryBecomeMasterRequestSchema)` to create a new message.
  */
 export const TryBecomeMasterRequestSchema: GenMessage<TryBecomeMasterRequest> = /*@__PURE__*/
-  messageDesc(file_index, 13);
+  messageDesc(file_index, 16);
 
 /**
  * @generated from message protoint.TryBecomeMasterResponse
@@ -415,7 +547,7 @@ export type TryBecomeMasterResponse = Message<"protoint.TryBecomeMasterResponse"
  * Use `create(TryBecomeMasterResponseSchema)` to create a new message.
  */
 export const TryBecomeMasterResponseSchema: GenMessage<TryBecomeMasterResponse> = /*@__PURE__*/
-  messageDesc(file_index, 14);
+  messageDesc(file_index, 17);
 
 /**
  * @generated from message protoint.Address
@@ -442,7 +574,7 @@ export type Address = Message<"protoint.Address"> & {
  * Use `create(AddressSchema)` to create a new message.
  */
 export const AddressSchema: GenMessage<Address> = /*@__PURE__*/
-  messageDesc(file_index, 15);
+  messageDesc(file_index, 18);
 
 /**
  * @generated from message protoint.LeadershipChange
@@ -459,7 +591,7 @@ export type LeadershipChange = Message<"protoint.LeadershipChange"> & {
  * Use `create(LeadershipChangeSchema)` to create a new message.
  */
 export const LeadershipChangeSchema: GenMessage<LeadershipChange> = /*@__PURE__*/
-  messageDesc(file_index, 16);
+  messageDesc(file_index, 19);
 
 /**
  * @generated from message protoint.Transfer
@@ -486,7 +618,7 @@ export type Transfer = Message<"protoint.Transfer"> & {
  * Use `create(TransferSchema)` to create a new message.
  */
 export const TransferSchema: GenMessage<Transfer> = /*@__PURE__*/
-  messageDesc(file_index, 17);
+  messageDesc(file_index, 20);
 
 /**
  * @generated from message protoint.Response
@@ -528,7 +660,7 @@ export type Response = Message<"protoint.Response"> & {
  * Use `create(ResponseSchema)` to create a new message.
  */
 export const ResponseSchema: GenMessage<Response> = /*@__PURE__*/
-  messageDesc(file_index, 18);
+  messageDesc(file_index, 21);
 
 /**
  * @generated from message protoint.TransferSingle
@@ -605,7 +737,7 @@ export type TransferSingle = Message<"protoint.TransferSingle"> & {
  * Use `create(TransferSingleSchema)` to create a new message.
  */
 export const TransferSingleSchema: GenMessage<TransferSingle> = /*@__PURE__*/
-  messageDesc(file_index, 19);
+  messageDesc(file_index, 22);
 
 /**
  * CREATE COMUNITI REQUEST RESPONSE
@@ -629,7 +761,7 @@ export type CreateComunitiInitial = Message<"protoint.CreateComunitiInitial"> & 
  * Use `create(CreateComunitiInitialSchema)` to create a new message.
  */
 export const CreateComunitiInitialSchema: GenMessage<CreateComunitiInitial> = /*@__PURE__*/
-  messageDesc(file_index, 20);
+  messageDesc(file_index, 23);
 
 /**
  * @generated from message protoint.CreateComunitiInitialResponse
@@ -656,7 +788,7 @@ export type CreateComunitiInitialResponse = Message<"protoint.CreateComunitiInit
  * Use `create(CreateComunitiInitialResponseSchema)` to create a new message.
  */
 export const CreateComunitiInitialResponseSchema: GenMessage<CreateComunitiInitialResponse> = /*@__PURE__*/
-  messageDesc(file_index, 21);
+  messageDesc(file_index, 24);
 
 /**
  * @generated from message protoint.CreateComunitiFinal
@@ -728,7 +860,7 @@ export type CreateComunitiFinal = Message<"protoint.CreateComunitiFinal"> & {
  * Use `create(CreateComunitiFinalSchema)` to create a new message.
  */
 export const CreateComunitiFinalSchema: GenMessage<CreateComunitiFinal> = /*@__PURE__*/
-  messageDesc(file_index, 22);
+  messageDesc(file_index, 25);
 
 /**
  * @generated from message protoint.CreateComunitiResponse
@@ -750,7 +882,7 @@ export type CreateComunitiResponse = Message<"protoint.CreateComunitiResponse"> 
  * Use `create(CreateComunitiResponseSchema)` to create a new message.
  */
 export const CreateComunitiResponseSchema: GenMessage<CreateComunitiResponse> = /*@__PURE__*/
-  messageDesc(file_index, 23);
+  messageDesc(file_index, 26);
 
 /**
  * @generated from message protoint.NetworkCredential
@@ -852,7 +984,7 @@ export type NetworkCredential = Message<"protoint.NetworkCredential"> & {
  * Use `create(NetworkCredentialSchema)` to create a new message.
  */
 export const NetworkCredentialSchema: GenMessage<NetworkCredential> = /*@__PURE__*/
-  messageDesc(file_index, 24);
+  messageDesc(file_index, 27);
 
 /**
  * @generated from message protoint.BootData
@@ -884,7 +1016,7 @@ export type BootData = Message<"protoint.BootData"> & {
  * Use `create(BootDataSchema)` to create a new message.
  */
 export const BootDataSchema: GenMessage<BootData> = /*@__PURE__*/
-  messageDesc(file_index, 25);
+  messageDesc(file_index, 28);
 
 /**
  * KeyFileUpdate is appended to the key file for append-only mutations.
@@ -999,7 +1131,7 @@ export type KeyFileUpdate = Message<"protoint.KeyFileUpdate"> & {
  * Use `create(KeyFileUpdateSchema)` to create a new message.
  */
 export const KeyFileUpdateSchema: GenMessage<KeyFileUpdate> = /*@__PURE__*/
-  messageDesc(file_index, 26);
+  messageDesc(file_index, 29);
 
 /**
  * @generated from message protoint.BootPass
@@ -1016,7 +1148,7 @@ export type BootPass = Message<"protoint.BootPass"> & {
  * Use `create(BootPassSchema)` to create a new message.
  */
 export const BootPassSchema: GenMessage<BootPass> = /*@__PURE__*/
-  messageDesc(file_index, 27);
+  messageDesc(file_index, 30);
 
 /**
  * WRITE TO COMUNITI OBJECT RESPONSE
@@ -1045,7 +1177,7 @@ export type WriteResponse = Message<"protoint.WriteResponse"> & {
  * Use `create(WriteResponseSchema)` to create a new message.
  */
 export const WriteResponseSchema: GenMessage<WriteResponse> = /*@__PURE__*/
-  messageDesc(file_index, 28);
+  messageDesc(file_index, 31);
 
 /**
  * Entry for batch processing - can be either object or link
@@ -1127,7 +1259,7 @@ export type BatchEntry = Message<"protoint.BatchEntry"> & {
  * Use `create(BatchEntrySchema)` to create a new message.
  */
 export const BatchEntrySchema: GenMessage<BatchEntry> = /*@__PURE__*/
-  messageDesc(file_index, 29);
+  messageDesc(file_index, 32);
 
 /**
  * Request for batch entry processing
@@ -1153,7 +1285,7 @@ export type BatchEntryRequest = Message<"protoint.BatchEntryRequest"> & {
  * Use `create(BatchEntryRequestSchema)` to create a new message.
  */
 export const BatchEntryRequestSchema: GenMessage<BatchEntryRequest> = /*@__PURE__*/
-  messageDesc(file_index, 30);
+  messageDesc(file_index, 33);
 
 /**
  * Response for each entry
@@ -1196,7 +1328,7 @@ export type BatchEntryResponse = Message<"protoint.BatchEntryResponse"> & {
  * Use `create(BatchEntryResponseSchema)` to create a new message.
  */
 export const BatchEntryResponseSchema: GenMessage<BatchEntryResponse> = /*@__PURE__*/
-  messageDesc(file_index, 31);
+  messageDesc(file_index, 34);
 
 /**
  * Overall batch response
@@ -1215,7 +1347,7 @@ export type BatchEntryResponseList = Message<"protoint.BatchEntryResponseList"> 
  * Use `create(BatchEntryResponseListSchema)` to create a new message.
  */
 export const BatchEntryResponseListSchema: GenMessage<BatchEntryResponseList> = /*@__PURE__*/
-  messageDesc(file_index, 32);
+  messageDesc(file_index, 35);
 
 /**
  * GRAPH QUERY PROCESSING
@@ -1251,7 +1383,7 @@ export type GraphQueryRequest = Message<"protoint.GraphQueryRequest"> & {
  * Use `create(GraphQueryRequestSchema)` to create a new message.
  */
 export const GraphQueryRequestSchema: GenMessage<GraphQueryRequest> = /*@__PURE__*/
-  messageDesc(file_index, 33);
+  messageDesc(file_index, 36);
 
 /**
  * Response for graph query
@@ -1282,7 +1414,7 @@ export type GraphQueryResponse = Message<"protoint.GraphQueryResponse"> & {
  * Use `create(GraphQueryResponseSchema)` to create a new message.
  */
 export const GraphQueryResponseSchema: GenMessage<GraphQueryResponse> = /*@__PURE__*/
-  messageDesc(file_index, 34);
+  messageDesc(file_index, 37);
 
 /**
  * ROOT OBJECT BLOCKS
@@ -1313,7 +1445,7 @@ export type RootObjectBlocksRequest = Message<"protoint.RootObjectBlocksRequest"
  * Use `create(RootObjectBlocksRequestSchema)` to create a new message.
  */
 export const RootObjectBlocksRequestSchema: GenMessage<RootObjectBlocksRequest> = /*@__PURE__*/
-  messageDesc(file_index, 35);
+  messageDesc(file_index, 38);
 
 /**
  * A single block from object-1, with a global sequential ID.
@@ -1353,7 +1485,7 @@ export type RootBlockData = Message<"protoint.RootBlockData"> & {
  * Use `create(RootBlockDataSchema)` to create a new message.
  */
 export const RootBlockDataSchema: GenMessage<RootBlockData> = /*@__PURE__*/
-  messageDesc(file_index, 36);
+  messageDesc(file_index, 39);
 
 /**
  * Response carrying object-1 blocks and a pagination cursor.
@@ -1391,7 +1523,7 @@ export type RootObjectBlocksResponse = Message<"protoint.RootObjectBlocksRespons
  * Use `create(RootObjectBlocksResponseSchema)` to create a new message.
  */
 export const RootObjectBlocksResponseSchema: GenMessage<RootObjectBlocksResponse> = /*@__PURE__*/
-  messageDesc(file_index, 37);
+  messageDesc(file_index, 40);
 
 /**
  * ROOT OBJECT WRITE
@@ -1428,7 +1560,7 @@ export type RootObjectWriteRequest = Message<"protoint.RootObjectWriteRequest"> 
  * Use `create(RootObjectWriteRequestSchema)` to create a new message.
  */
 export const RootObjectWriteRequestSchema: GenMessage<RootObjectWriteRequest> = /*@__PURE__*/
-  messageDesc(file_index, 38);
+  messageDesc(file_index, 41);
 
 /**
  * @generated from enum protoint.Inst
@@ -1579,6 +1711,20 @@ export enum SingleInst {
    * @generated from enum value: ROOT_OBJECT_WRITE = 21;
    */
   ROOT_OBJECT_WRITE = 21,
+
+  /**
+   * Account key self-service: account holder may add/update/disable own pubKeys.
+   *
+   * @generated from enum value: ACCOUNT_KEY_SELF_SERVICE = 22;
+   */
+  ACCOUNT_KEY_SELF_SERVICE = 22,
+
+  /**
+   * Account info: returns the account and pubkeys attached to the connection key.
+   *
+   * @generated from enum value: ACCOUNT_INFO = 23;
+   */
+  ACCOUNT_INFO = 23,
 }
 
 /**
@@ -1586,6 +1732,37 @@ export enum SingleInst {
  */
 export const SingleInstSchema: GenEnum<SingleInst> = /*@__PURE__*/
   enumDesc(file_index, 1);
+
+/**
+ * @generated from enum protoint.AccountKeySelfServiceAction
+ */
+export enum AccountKeySelfServiceAction {
+  /**
+   * @generated from enum value: AK_ACTION_UNSET = 0;
+   */
+  AK_ACTION_UNSET = 0,
+
+  /**
+   * @generated from enum value: AK_ADD_PUBKEY = 1;
+   */
+  AK_ADD_PUBKEY = 1,
+
+  /**
+   * @generated from enum value: AK_UPDATE_PERMISSION = 2;
+   */
+  AK_UPDATE_PERMISSION = 2,
+
+  /**
+   * @generated from enum value: AK_DISABLE_PUBKEY = 3;
+   */
+  AK_DISABLE_PUBKEY = 3,
+}
+
+/**
+ * Describes the enum protoint.AccountKeySelfServiceAction.
+ */
+export const AccountKeySelfServiceActionSchema: GenEnum<AccountKeySelfServiceAction> = /*@__PURE__*/
+  enumDesc(file_index, 2);
 
 /**
  * BATCH ENTRY PROCESSING
@@ -1609,7 +1786,7 @@ export enum LinkDirection {
  * Describes the enum protoint.LinkDirection.
  */
 export const LinkDirectionSchema: GenEnum<LinkDirection> = /*@__PURE__*/
-  enumDesc(file_index, 2);
+  enumDesc(file_index, 3);
 
 /**
  * Status for each entry response
@@ -1637,5 +1814,5 @@ export enum EntryStatus {
  * Describes the enum protoint.EntryStatus.
  */
 export const EntryStatusSchema: GenEnum<EntryStatus> = /*@__PURE__*/
-  enumDesc(file_index, 3);
+  enumDesc(file_index, 4);
 

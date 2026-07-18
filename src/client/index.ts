@@ -18,7 +18,7 @@ import type { Libp2p, PeerId, Stream, Connection } from '@libp2p/interface';
 import type { ClientConfig, RequestOptions } from './types.js';
 import { CLIENT_PROTOCOL } from '../protocol/constants.js';
 import { sendAndReceive, writeMessage, readMessage } from '../protocol/stream.js';
-import { signRequest, signResponse, verifyResponse } from '../protocol/signing.js';
+import { signRequest, signResponse, verifyResponse, buildAccountKeySigPayload } from '../protocol/signing.js';
 import { signBytes } from '../keymanager/crypto.js';
 import { encodeTime } from '../protocol/time.js';
 import {
@@ -34,6 +34,9 @@ import {
   GraphQueryRequestSchema,
   type RootObjectBlocksResponse, RootObjectBlocksResponseSchema,
   RootObjectBlocksRequestSchema,
+  AccountKeySelfServiceRequestSchema,
+  AccountKeySelfServiceAction,
+  type AccountInfoResponse, AccountInfoResponseSchema,
   SingleInst,
   type Response,
 } from '../proto/index_pb.js';
@@ -480,6 +483,63 @@ export class ComunitisClient extends EventTarget {
     if (!respondCalled) {
       await respond(new Uint8Array(0));
     }
+  }
+
+  // ── Account key self-service ────────────────────────────────────────────────
+
+  async addAccountPubKey(
+    accountID: bigint,
+    newPubKey: Uint8Array,
+    isPrivate = false,
+    opts?: RequestOptions,
+  ): Promise<bigint> {
+    const action = AccountKeySelfServiceAction.AK_ADD_PUBKEY;
+    const innerPayload = buildAccountKeySigPayload(accountID, action, isPrivate, { newPubKey });
+    const accountKeySig = signBytes(this.config.signingKeyPriv, innerPayload);
+    const data = toBinary(AccountKeySelfServiceRequestSchema, pbCreate(AccountKeySelfServiceRequestSchema, {
+      AccountID: accountID, Action: action, NewPubKey: newPubKey,
+      IsPrivate: isPrivate, AccountKeySig: accountKeySig,
+    }));
+    const raw = await this.request(SingleInst.ACCOUNT_KEY_SELF_SERVICE, data, opts);
+    return new DataView(raw.buffer, raw.byteOffset, 8).getBigUint64(0, true);
+  }
+
+  async updateAccountPubKeyPermission(
+    accountID: bigint,
+    targetKeyID: bigint,
+    permissionSpec: string,
+    isPrivate = false,
+    opts?: RequestOptions,
+  ): Promise<void> {
+    const action = AccountKeySelfServiceAction.AK_UPDATE_PERMISSION;
+    const innerPayload = buildAccountKeySigPayload(accountID, action, isPrivate, { targetKeyID, permSpec: permissionSpec });
+    const accountKeySig = signBytes(this.config.signingKeyPriv, innerPayload);
+    const data = toBinary(AccountKeySelfServiceRequestSchema, pbCreate(AccountKeySelfServiceRequestSchema, {
+      AccountID: accountID, Action: action, TargetKeyID: targetKeyID,
+      PermissionSpec: permissionSpec, IsPrivate: isPrivate, AccountKeySig: accountKeySig,
+    }));
+    await this.request(SingleInst.ACCOUNT_KEY_SELF_SERVICE, data, opts);
+  }
+
+  async disableAccountPubKey(
+    accountID: bigint,
+    targetKeyID: bigint,
+    isPrivate = false,
+    opts?: RequestOptions,
+  ): Promise<void> {
+    const action = AccountKeySelfServiceAction.AK_DISABLE_PUBKEY;
+    const innerPayload = buildAccountKeySigPayload(accountID, action, isPrivate, { targetKeyID });
+    const accountKeySig = signBytes(this.config.signingKeyPriv, innerPayload);
+    const data = toBinary(AccountKeySelfServiceRequestSchema, pbCreate(AccountKeySelfServiceRequestSchema, {
+      AccountID: accountID, Action: action, TargetKeyID: targetKeyID,
+      IsPrivate: isPrivate, AccountKeySig: accountKeySig,
+    }));
+    await this.request(SingleInst.ACCOUNT_KEY_SELF_SERVICE, data, opts);
+  }
+
+  async accountInfo(opts?: RequestOptions): Promise<AccountInfoResponse> {
+    const raw = await this.request(SingleInst.ACCOUNT_INFO, new Uint8Array(0), opts);
+    return fromBinary(AccountInfoResponseSchema, raw);
   }
 
   // ── Peer discovery via DHT ──────────────────────────────────────────────────
