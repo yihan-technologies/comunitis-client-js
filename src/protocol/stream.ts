@@ -31,8 +31,12 @@ async function readAll(stream: Stream): Promise<Uint8Array> {
 }
 
 // Await the 'drain' event on a backpressured stream before continuing.
+// Falls back after 5000ms to avoid hanging indefinitely if the event never fires.
 function awaitDrain(stream: Stream): Promise<void> {
-  return new Promise(resolve => stream.addEventListener('drain', resolve as () => void, { once: true }));
+  return new Promise(resolve => {
+    const timer = setTimeout(resolve, 5000);
+    stream.addEventListener('drain', () => { clearTimeout(timer); resolve(); }, { once: true });
+  });
 }
 
 // Write a raw proto message and half-close the write side so the remote's

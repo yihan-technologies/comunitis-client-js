@@ -259,12 +259,16 @@ export class ComunitisKadDHT {
   // --- iterative lookups ---
 
   private async iterativeFindNode(target: NodeID): Promise<PeerEntry[]> {
+    const MAX_ROUNDS = 20;
     const seeds = this.rt.closestPeers(target, K);
     if (seeds.length === 0) return [];
     const queried = new Set<string>();
     let pending = [...seeds];
+    let rounds = 0;
 
     for (;;) {
+      if (rounds >= MAX_ROUNDS) break;
+      rounds++;
       const batch: PeerEntry[] = [];
       const next: PeerEntry[] = [];
       for (const p of pending) {

@@ -557,6 +557,9 @@ export class KeyManager {
 
   async decryptField(chainId: string, ciphertext: Uint8Array, date: Date): Promise<Uint8Array> {
     if (!this.hasL2) throw new NoL2PasswordError();
+    const chain = this.chains.get(chainId);
+    if (!chain) throw new KeyNotFoundError();
+    if (chain.status !== ChainStatusActive) throw new KeyRevokedError();
     const versions = this.chainVersions.get(chainId);
     if (!versions) throw new KeyNotFoundError();
 
@@ -719,7 +722,8 @@ export class KeyManager {
       );
       if (signerEntry) {
         const [signerId, signerMeta] = signerEntry;
-        const payload = new TextEncoder().encode(JSON.stringify(meta) + bundle.encryptedPrivKey);
+        const sortedMeta = JSON.stringify(meta, Object.keys(meta).sort());
+        const payload = new TextEncoder().encode(JSON.stringify({ meta: sortedMeta, encryptedPrivKey: bundle.encryptedPrivKey }));
         const sig = await this.sign(signerId, payload);
         bundle.signature = bytesToBase64(sig);
         bundle.signerKeyId = signerMeta.id;
@@ -749,7 +753,8 @@ export class KeyManager {
       }
 
       if (signerPub) {
-        const payload = new TextEncoder().encode(JSON.stringify(meta) + bundle.encryptedPrivKey);
+        const sortedMeta = JSON.stringify(meta, Object.keys(meta).sort());
+        const payload = new TextEncoder().encode(JSON.stringify({ meta: sortedMeta, encryptedPrivKey: bundle.encryptedPrivKey }));
         if (!verifyBytes(signerPub, payload, base64ToBytes(bundle.signature))) {
           throw new InvalidKeyError();
         }

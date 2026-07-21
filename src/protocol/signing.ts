@@ -14,7 +14,10 @@ export function requestSignBytes(requestId: string, time: Uint8Array, data: Uint
 }
 
 // responseSignBytes builds the message verified for a Response.
-// Matches: Sign(RequestID_utf8 || Time_8bytes_LE || Data_bytes || ErrCode_4bytes_LE || ErrString_utf8)
+// Matches Go's SignResponseIndex exactly:
+//   Sign(RequestID_utf8 || Time_8bytes_LE || Data_bytes
+//        [|| ErrCode_4bytes_LE]  // only when errCode is present and non-zero
+//        [|| ErrString_utf8])    // only when errStr is present and non-empty
 export function responseSignBytes(
   requestId: string,
   time: Uint8Array,
@@ -23,16 +26,21 @@ export function responseSignBytes(
   errStr?: string,
 ): Uint8Array {
   const idBytes = new TextEncoder().encode(requestId);
-  const errStrBytes = errStr ? new TextEncoder().encode(errStr) : new Uint8Array(0);
-  const errCodeBytes = new Uint8Array(4);
-  if (errCode != null) new DataView(errCodeBytes.buffer).setUint32(0, errCode, true);
+  const includeErrCode = errCode != null && errCode !== 0;
+  const errStrBytes = (errStr != null && errStr !== '') ? new TextEncoder().encode(errStr) : new Uint8Array(0);
 
-  const msg = new Uint8Array(idBytes.length + 8 + data.length + 4 + errStrBytes.length);
+  const msg = new Uint8Array(
+    idBytes.length + 8 + data.length
+    + (includeErrCode ? 4 : 0)
+    + errStrBytes.length,
+  );
   let off = 0;
   msg.set(idBytes, off); off += idBytes.length;
   msg.set(time, off); off += 8;
   msg.set(data, off); off += data.length;
-  msg.set(errCodeBytes, off); off += 4;
+  if (includeErrCode) {
+    new DataView(msg.buffer).setUint32(off, errCode, true); off += 4;
+  }
   msg.set(errStrBytes, off);
   return msg;
 }

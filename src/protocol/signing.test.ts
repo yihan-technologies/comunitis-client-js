@@ -22,13 +22,25 @@ describe('requestSignBytes', () => {
 });
 
 describe('responseSignBytes', () => {
-  it('has correct length: id + 8 + data + 4 + errStr', () => {
+  it('has correct length: id + 8 + data + 4 + errStr when errCode is non-zero', () => {
     const id = 'xy';
     const time = new Uint8Array(8);
     const data = new Uint8Array([1, 2, 3]);
     const errStr = 'oops';
     const msg = responseSignBytes(id, time, data, 5, errStr);
     expect(msg.byteLength).toBe(2 + 8 + 3 + 4 + 4);
+  });
+
+  it('omits ErrCode bytes when errCode is absent (matches Go SignResponseIndex)', () => {
+    // Go only appends ErrCode when res.ErrCode != nil && *res.ErrCode != 0.
+    const id = 'xy';
+    const time = new Uint8Array(8);
+    const data = new Uint8Array([1, 2, 3]);
+    const msgNoErr = responseSignBytes(id, time, data);
+    expect(msgNoErr.byteLength).toBe(2 + 8 + 3); // no ErrCode, no ErrStr
+
+    const msgZeroCode = responseSignBytes(id, time, data, 0);
+    expect(msgZeroCode.byteLength).toBe(2 + 8 + 3); // errCode=0 is not appended
   });
 });
 

@@ -94,9 +94,6 @@ function marshalEd25519PubKey(rawPub: Uint8Array): Uint8Array {
   return out;
 }
 
-/*
-{'myDestinationBankCode': '090480', 'myDestinationAccountNumber': '0993417574', 'myAccountName': 'ERCAS-DASHME TECHNOLOGIES LTD/Dashme Technologies LTD', 'myOriginatorName': 'ERCAS INTEGRATED SOLUTIONS LIMITED', 'myNarration': 'Settlement Transfer', 'myPaymentReference': '019F1893FBB177F68F1F949105176A33', 'myAmount': '53535.00', 'sourceAccountNo': '0122675636'}}, 'response': {'status_code': 200, 'content': {'code': None, 'message': None, 'responseCode': '30', 'sessionId': '000017260630134939508078190153'}}, 'duration': 13.676746}
-*/
 
 // Extract the raw 32-byte Ed25519 pubkey from a marshaled libp2p pb.PublicKey.
 // Format: [0x08, 0x01, 0x12, <len>, ...key bytes]
@@ -220,7 +217,10 @@ export class ComunitisClient extends EventTarget {
       this.startReconnectLoop();
     } catch (err) {
       if (started) await Promise.resolve(this.node.stop()).catch(() => null);
-      else this.node.removeEventListener('peer:connect', onPeerChange);
+      else {
+        this.node.removeEventListener('peer:connect', onPeerChange);
+        this.node.removeEventListener('peer:disconnect', onPeerChange);
+      }
       this.node = null;
       throw err;
     }
@@ -350,10 +350,7 @@ export class ComunitisClient extends EventTarget {
 
   async serverStats(opts?: RequestOptions): Promise<ServerStatsResponse> {
     const raw = await this.request(SERVER_STATS_INST, new Uint8Array(), opts);
-    const wrapper = fromBinary(GraphQueryResponseSchema, raw);
-    const returned =  JSON.parse(new TextDecoder().decode(wrapper.Data)) as ServerStatsResponse;
-    //console.log("SERVER STATS RETURNED: ", returned)
-    return returned
+    return JSON.parse(new TextDecoder().decode(raw)) as ServerStatsResponse;
   }
 
   async rootObjectBlocks(
@@ -436,6 +433,7 @@ export class ComunitisClient extends EventTarget {
     }
 
     if (res.ErrCode != null || res.Err) {
+      console.warn('[p2p] request error: ', res, " Error Code: ", res.ErrCode, " Error: ", res.Err);
       throw Object.assign(new Error(res.Err ?? 'server error'), { code: res.ErrCode });
     }
 
@@ -445,7 +443,12 @@ export class ComunitisClient extends EventTarget {
   // ── Inbound handler (client↔client) ────────────────────────────────────────
 
   private async handleInbound(stream: Stream, _connection: Connection): Promise<void> {
-    const reqBytes = await readMessage(stream);
+    const reqBytes = await Promise.race([
+      readMessage(stream),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('inbound read timeout')), 30000)
+      ),
+    ]);
     const req = fromBinary(TransferSingleSchema, reqBytes);
 
     let respondCalled = false;
@@ -537,6 +540,8 @@ export class ComunitisClient extends EventTarget {
     await this.request(SingleInst.ACCOUNT_KEY_SELF_SERVICE, data, opts);
   }
 
+  // Returns the account and all attached pubkeys for the signing key configured on this client.
+  // The server identifies the caller via TransferSingle.Key, which must be a registered type-3 signing key.
   async accountInfo(opts?: RequestOptions): Promise<AccountInfoResponse> {
     const raw = await this.request(SingleInst.ACCOUNT_INFO, new Uint8Array(0), opts);
     return fromBinary(AccountInfoResponseSchema, raw);
@@ -554,11 +559,16 @@ export class ComunitisClient extends EventTarget {
       }
     }
 
-    const rootPeerID =  peerIdFromString(this.config.comunitiID as string)
-
-    const res = await this.dht?.findPeer(rootPeerID)
-    if(res != undefined){
-      return res?.id
+    if (this.config.comunitiID) {
+      try {
+        const rootPeerID = peerIdFromString(this.config.comunitiID);
+        const res = await this.dht?.findPeer(rootPeerID);
+        if (res != undefined) {
+          return res.id;
+        }
+      } catch {
+        // comunitiID is not a valid peer ID — skip DHT lookup
+      }
     }
 
     // Slow path: re-dial bootstrap addresses.

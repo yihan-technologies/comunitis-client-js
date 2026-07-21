@@ -105,7 +105,9 @@ export function decodePeerRecords(payload: Uint8Array): PeerEntry[] {
       const mh = decodeMultihash(pidBytes);
       const peerId = peerIdFromMultihash(mh);
       out.push({ peerId, nodeId: idFromPeer(peerId), addrs });
-    } catch { /* skip invalid */ }
+    } catch (e) {
+      console.warn('[dht] decodePeerRecords: skipping invalid peer record:', e);
+    }
   }
   return out;
 }
