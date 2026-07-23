@@ -387,7 +387,15 @@ export class ComunitisClient extends EventTarget {
     const timeout = opts?.timeout ?? this.config.requestTimeout ?? 30000;
     const requestId = randomUUID();
 
-    const { time, signature } = signRequest(this.config.signingKeyPriv, requestId, data);
+    const isAccountKeySelfService = inst === SingleInst.ACCOUNT_KEY_SELF_SERVICE;
+    const sigPriv = isAccountKeySelfService
+      ? (this.config.accountKeyPriv ?? (() => { throw new Error('accountKeyPriv required for ACCOUNT_KEY_SELF_SERVICE'); })())
+      : this.config.signingKeyPriv;
+    const sigPub = isAccountKeySelfService
+      ? (this.config.accountKeyPub ?? (() => { throw new Error('accountKeyPub required for ACCOUNT_KEY_SELF_SERVICE'); })())
+      : this.config.signingKeyPub;
+
+    const { time, signature } = signRequest(sigPriv, requestId, data);
     const timeMs = new DataView(time.buffer, time.byteOffset, 8).getBigInt64(0, true);
 
     const transfer = pbCreate(TransferSingleSchema, {
@@ -396,7 +404,7 @@ export class ComunitisClient extends EventTarget {
       RequestID: requestId,
       Data: data,
       Signature: signature,
-      Key: marshalEd25519PubKey(this.config.signingKeyPub),
+      Key: marshalEd25519PubKey(sigPub),
       Time: timeMs,
       Return: true,
     });
@@ -418,6 +426,8 @@ export class ComunitisClient extends EventTarget {
     const response = fromBinary(TransferSingleSchema, responseBytes);
     const res = response.Responses[0] as Response | undefined;
     if (!res) throw new Error('empty response');
+
+    console.log(`[p2p] request: inst=${inst} comunitiID=${comunitiID} requestId=${requestId} peer=${opts?.targetPeer ?? 'auto'} timeout=${timeout}ms response: `, res);
 
     // Verify the response signature before acting on the payload.
     // If serverSigningKeyPub is configured, use it for strict verification.
@@ -498,7 +508,7 @@ export class ComunitisClient extends EventTarget {
   ): Promise<bigint> {
     const action = AccountKeySelfServiceAction.AK_ADD_PUBKEY;
     const innerPayload = buildAccountKeySigPayload(accountID, action, isPrivate, { newPubKey });
-    const accountKeySig = signBytes(this.config.signingKeyPriv, innerPayload);
+    const accountKeySig = signBytes(this.config.accountKeyPriv!, innerPayload);
     const data = toBinary(AccountKeySelfServiceRequestSchema, pbCreate(AccountKeySelfServiceRequestSchema, {
       AccountID: accountID, Action: action, NewPubKey: newPubKey,
       IsPrivate: isPrivate, AccountKeySig: accountKeySig,
@@ -516,7 +526,7 @@ export class ComunitisClient extends EventTarget {
   ): Promise<void> {
     const action = AccountKeySelfServiceAction.AK_UPDATE_PERMISSION;
     const innerPayload = buildAccountKeySigPayload(accountID, action, isPrivate, { targetKeyID, permSpec: permissionSpec });
-    const accountKeySig = signBytes(this.config.signingKeyPriv, innerPayload);
+    const accountKeySig = signBytes(this.config.accountKeyPriv!, innerPayload);
     const data = toBinary(AccountKeySelfServiceRequestSchema, pbCreate(AccountKeySelfServiceRequestSchema, {
       AccountID: accountID, Action: action, TargetKeyID: targetKeyID,
       PermissionSpec: permissionSpec, IsPrivate: isPrivate, AccountKeySig: accountKeySig,
@@ -532,7 +542,7 @@ export class ComunitisClient extends EventTarget {
   ): Promise<void> {
     const action = AccountKeySelfServiceAction.AK_DISABLE_PUBKEY;
     const innerPayload = buildAccountKeySigPayload(accountID, action, isPrivate, { targetKeyID });
-    const accountKeySig = signBytes(this.config.signingKeyPriv, innerPayload);
+    const accountKeySig = signBytes(this.config.accountKeyPriv!, innerPayload);
     const data = toBinary(AccountKeySelfServiceRequestSchema, pbCreate(AccountKeySelfServiceRequestSchema, {
       AccountID: accountID, Action: action, TargetKeyID: targetKeyID,
       IsPrivate: isPrivate, AccountKeySig: accountKeySig,

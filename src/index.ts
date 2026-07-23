@@ -12,7 +12,7 @@ export type { IStorage, StorageOptions } from './storage/interface.js';
 
 export { parseServerKeyFile } from './keyfile/parse.js';
 export type { ServerKeyFileData } from './keyfile/parse.js';
-export { parseGoExportBundle } from './keyfile/go-bundle.js';
+export { parseGoExportBundle, parseGoExportBundleAll } from './keyfile/go-bundle.js';
 export type { GoExportBundleData } from './keyfile/go-bundle.js';
 
 export { encodeFields, decodeFields } from './protocol/fields.js';
