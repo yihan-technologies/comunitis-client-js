@@ -3,13 +3,24 @@ import { encodeTime } from './time.js';
 import { AccountKeySelfServiceAction } from '../proto/index_pb.js';
 
 // requestSignBytes builds the message that gets Ed25519-signed for a TransferSingle request.
-// Matches: Sign(RequestID_utf8 || Time_8bytes_LE || Data_bytes)
-export function requestSignBytes(requestId: string, time: Uint8Array, data: Uint8Array): Uint8Array {
+// Matches Go requestSignPayload in db/comuniti_request.go:
+//   Sign(RequestID_utf8 || Time_8bytes_LE || Inst_4bytes_LE || ComunitiID_utf8 || Data_bytes)
+export function requestSignBytes(
+  requestId: string,
+  time: Uint8Array,
+  inst: number,
+  comunitiID: string,
+  data: Uint8Array,
+): Uint8Array {
   const idBytes = new TextEncoder().encode(requestId);
-  const msg = new Uint8Array(idBytes.length + 8 + data.length);
-  msg.set(idBytes, 0);
-  msg.set(time, idBytes.length);
-  msg.set(data, idBytes.length + 8);
+  const comBytes = new TextEncoder().encode(comunitiID);
+  const msg = new Uint8Array(idBytes.length + 8 + 4 + comBytes.length + data.length);
+  let off = 0;
+  msg.set(idBytes, off); off += idBytes.length;
+  msg.set(time, off); off += 8;
+  new DataView(msg.buffer, msg.byteOffset).setUint32(off, inst >>> 0, true); off += 4;
+  msg.set(comBytes, off); off += comBytes.length;
+  msg.set(data, off);
   return msg;
 }
 
@@ -45,9 +56,9 @@ export function responseSignBytes(
   return msg;
 }
 
-export function signRequest(priv64: Uint8Array, requestId: string, data: Uint8Array): { time: Uint8Array; signature: Uint8Array } {
+export function signRequest(priv64: Uint8Array, requestId: string, inst: number, comunitiID: string, data: Uint8Array): { time: Uint8Array; signature: Uint8Array } {
   const time = encodeTime();
-  const msg = requestSignBytes(requestId, time, data);
+  const msg = requestSignBytes(requestId, time, inst, comunitiID, data);
   const signature = signBytes(priv64, msg);
   return { time, signature };
 }

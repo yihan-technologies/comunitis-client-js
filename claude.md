@@ -198,5 +198,6 @@ npm run build   # npm run proto + tsup → dist/index.{js,cjs,d.ts}
 tsup config: `format: ['cjs','esm']`, `dts: true`, `platform: 'browser'`, bundles `netmask` inline.
 
 ## Known Quirks
-- `SERVER_STATS` (value 19) not in original JS proto enum. Workaround: `19 as unknown as SingleInst` in `src/client/index.ts`.
+- `SERVER_STATS` (19) and `ROOT_OBJECT_WRITE` (21) are in the generated enum; use `SingleInst.SERVER_STATS` directly (the `as unknown as SingleInst` casts were removed).
+- Request signature payload: `RequestID || Time(8 LE) || Inst(4 LE) || ComunitiID || Data` — see `requestSignBytes` in `src/protocol/signing.ts`. Must match Go `requestSignPayload`.
 - Proto source of truth: `../comunitis/shared/protoint/index.proto` — `buf.yaml` points there.

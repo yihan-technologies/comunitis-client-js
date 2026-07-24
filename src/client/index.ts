@@ -56,9 +56,8 @@ export interface ServerStatsResponse {
   timestamp: number;
 }
 
-// ponytail: cast avoids proto regeneration; wire value is raw int32
-const SERVER_STATS_INST = 19 as unknown as SingleInst;
-const ROOT_OBJECT_WRITE_INST = 21 as unknown as SingleInst;
+const SERVER_STATS_INST = SingleInst.SERVER_STATS;
+const ROOT_OBJECT_WRITE_INST = SingleInst.ROOT_OBJECT_WRITE;
 
 // Inline protowire encoder for RootObjectWriteRequest (field 1=Data, 2=Signature, 3=Time).
 // Avoids proto regeneration — Go handler decodes with protowire.
@@ -395,7 +394,7 @@ export class ComunitisClient extends EventTarget {
       ? (this.config.accountKeyPub ?? (() => { throw new Error('accountKeyPub required for ACCOUNT_KEY_SELF_SERVICE'); })())
       : this.config.signingKeyPub;
 
-    const { time, signature } = signRequest(sigPriv, requestId, data);
+    const { time, signature } = signRequest(sigPriv, requestId, inst, comunitiID, data);
     const timeMs = new DataView(time.buffer, time.byteOffset, 8).getBigInt64(0, true);
 
     const transfer = pbCreate(TransferSingleSchema, {

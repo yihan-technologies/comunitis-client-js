@@ -3,21 +3,23 @@ import { requestSignBytes, responseSignBytes, signRequest, signResponse, verifyR
 import { generateSigningKey, verifyBytes } from '../keymanager/crypto.js';
 
 describe('requestSignBytes', () => {
-  it('has correct length: idBytes + 8 + dataBytes', () => {
+  it('has correct length: idBytes + 8 + 4(inst) + comunitiID + dataBytes', () => {
     const id = 'abc';
     const time = new Uint8Array(8).fill(1);
     const data = new Uint8Array([10, 20]);
-    const msg = requestSignBytes(id, time, data);
-    expect(msg.byteLength).toBe(3 + 8 + 2);
+    const msg = requestSignBytes(id, time, 13, 'com', data);
+    expect(msg.byteLength).toBe(3 + 8 + 4 + 3 + 2);
   });
 
-  it('contains requestId at start', () => {
+  it('contains requestId at start and inst LE after time', () => {
     const id = 'hello';
     const time = new Uint8Array(8);
     const data = new Uint8Array(0);
-    const msg = requestSignBytes(id, time, data);
+    const msg = requestSignBytes(id, time, 0x14, '', data);
     const idBytes = new TextEncoder().encode(id);
     expect(msg.slice(0, 5)).toEqual(idBytes);
+    // inst is 4 bytes LE immediately after the 8-byte time
+    expect(new DataView(msg.buffer, msg.byteOffset).getUint32(5 + 8, true)).toBe(0x14);
   });
 });
 
@@ -49,10 +51,10 @@ describe('signRequest / verifyResponse', () => {
     const { pub, priv } = generateSigningKey();
     const requestId = 'test-req-id';
     const data = new Uint8Array([1, 2, 3]);
-    const { time, signature } = signRequest(priv, requestId, data);
+    const { time, signature } = signRequest(priv, requestId, 13, 'com', data);
 
     // Rebuild signed bytes and verify manually
-    const msg = requestSignBytes(requestId, time, data);
+    const msg = requestSignBytes(requestId, time, 13, 'com', data);
     expect(verifyBytes(pub, msg, signature)).toBe(true);
   });
 
@@ -60,10 +62,30 @@ describe('signRequest / verifyResponse', () => {
     const { pub, priv } = generateSigningKey();
     const requestId = 'test-req-id';
     const data = new Uint8Array([1, 2, 3]);
-    const { time, signature } = signRequest(priv, requestId, data);
+    const { time, signature } = signRequest(priv, requestId, 13, 'com', data);
 
     const tampered = new Uint8Array([1, 2, 4]); // last byte changed
-    const msg = requestSignBytes(requestId, time, tampered);
+    const msg = requestSignBytes(requestId, time, 13, 'com', tampered);
+    expect(verifyBytes(pub, msg, signature)).toBe(false);
+  });
+
+  it('rejects tampered inst (binding prevents handler redirection)', () => {
+    const { pub, priv } = generateSigningKey();
+    const requestId = 'test-req-id';
+    const data = new Uint8Array([1, 2, 3]);
+    const { time, signature } = signRequest(priv, requestId, 13, 'com', data);
+
+    const msg = requestSignBytes(requestId, time, 14, 'com', data); // inst changed
+    expect(verifyBytes(pub, msg, signature)).toBe(false);
+  });
+
+  it('rejects tampered comunitiID (binding prevents cross-comuniti replay)', () => {
+    const { pub, priv } = generateSigningKey();
+    const requestId = 'test-req-id';
+    const data = new Uint8Array([1, 2, 3]);
+    const { time, signature } = signRequest(priv, requestId, 13, 'com', data);
+
+    const msg = requestSignBytes(requestId, time, 13, 'other', data); // comuniti changed
     expect(verifyBytes(pub, msg, signature)).toBe(false);
   });
 });
