@@ -17,4 +17,6 @@ export interface RequestOptions {
   targetPeer?: PeerId;
   comunitiID?: string;
   timeout?: number;
+  signingKeyPriv?: Uint8Array;    // override config signing key for this request (64-byte priv)
+  signingKeyPub?: Uint8Array;     // matching 32-byte pub for the override key
 }

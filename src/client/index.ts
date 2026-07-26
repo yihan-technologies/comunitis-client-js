@@ -349,7 +349,8 @@ export class ComunitisClient extends EventTarget {
 
   async serverStats(opts?: RequestOptions): Promise<ServerStatsResponse> {
     const raw = await this.request(SERVER_STATS_INST, new Uint8Array(), opts);
-    return JSON.parse(new TextDecoder().decode(raw)) as ServerStatsResponse;
+    const resp = fromBinary(GraphQueryResponseSchema, raw);
+    return JSON.parse(new TextDecoder().decode(resp.Data)) as ServerStatsResponse;
   }
 
   async rootObjectBlocks(
@@ -371,7 +372,7 @@ export class ComunitisClient extends EventTarget {
     const time = encodeTime();
     const payload = new Uint8Array(8 + data.length);
     payload.set(time, 0); payload.set(data, 8);
-    const signature = signBytes(this.config.signingKeyPriv, payload);
+    const signature = signBytes(opts?.signingKeyPriv ?? this.config.signingKeyPriv, payload);
     const reqData = _encodeRootWriteProto(data, signature, time);
     await this.request(ROOT_OBJECT_WRITE_INST, reqData, opts);
   }
@@ -389,10 +390,10 @@ export class ComunitisClient extends EventTarget {
     const isAccountKeySelfService = inst === SingleInst.ACCOUNT_KEY_SELF_SERVICE;
     const sigPriv = isAccountKeySelfService
       ? (this.config.accountKeyPriv ?? (() => { throw new Error('accountKeyPriv required for ACCOUNT_KEY_SELF_SERVICE'); })())
-      : this.config.signingKeyPriv;
+      : (opts?.signingKeyPriv ?? this.config.signingKeyPriv);
     const sigPub = isAccountKeySelfService
       ? (this.config.accountKeyPub ?? (() => { throw new Error('accountKeyPub required for ACCOUNT_KEY_SELF_SERVICE'); })())
-      : this.config.signingKeyPub;
+      : (opts?.signingKeyPub ?? this.config.signingKeyPub);
 
     const { time, signature } = signRequest(sigPriv, requestId, inst, comunitiID, data);
     const timeMs = new DataView(time.buffer, time.byteOffset, 8).getBigInt64(0, true);
@@ -436,7 +437,7 @@ export class ComunitisClient extends EventTarget {
     if (verifyPub && res.Signature?.length) {
       const timeBuf = new Uint8Array(8);
       new DataView(timeBuf.buffer).setBigInt64(0, res.Time, true);
-      if (!verifyResponse(verifyPub, requestId, timeBuf, res.Data, res.Signature)) {
+      if (!verifyResponse(verifyPub, requestId, timeBuf, res.Data, res.Signature, res.ErrCode, res.Err || undefined)) {
         throw new Error('invalid response signature');
       }
     }
