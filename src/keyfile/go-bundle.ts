@@ -96,9 +96,12 @@ export async function parseGoExportBundle(
   if (data[offset] !== ENTRY_HEADER) throw new Error('Expected header entry at offset 8');
   offset += 1;
 
+  // hdrLen is the length of the JSON data ONLY — it excludes the 32-byte SHA-256 checksum.
+  // Go writeFileHeader layout: [type(1)][len(4 LE)][SHA-256(32)][JSON data(len)]
+  // Confirmed against comunitis/keymanager/storage.go writeFileHeader / readFileHeader.
   const hdrLen = readU32LE(data, offset);
   offset += 4;
-  offset += 32; // skip SHA-256 checksum (integrity checked by Argon2/AES-GCM on load)
+  offset += 32; // skip SHA-256 checksum (integrity verified by Go on write; excluded from hdrLen)
 
   const hdrJson = new TextDecoder().decode(data.slice(offset, offset + hdrLen));
   offset += hdrLen;

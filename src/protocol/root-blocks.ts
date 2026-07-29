@@ -27,7 +27,11 @@ export function decodeRootBlock(block: RootBlockData): string {
   let data = block.Data;
   if (data.length < 28) return '';
 
-  // Strip StartTypeObject prefix if present
+  // Strip StartTypeObject prefix if present.
+  // Checks byte offset 28 (START_TYPE_OBJECT_SIZE - 9 = 28) for RawType=1 (StartTypeObject)
+  // to identify the 37-byte StartTypeObject prefix present only in file-index-1 files.
+  // ReadNextBlock(0) for object file index=1 returns the entire file (StartTypeObject + data block
+  // concatenated), so we must skip the 37-byte header before decoding the data block.
   if (data.length > START_TYPE_OBJECT_SIZE && data[START_TYPE_OBJECT_SIZE - 9] === START_TYPE_OBJECT_RAWTYPE) {
     data = data.slice(START_TYPE_OBJECT_SIZE);
   }

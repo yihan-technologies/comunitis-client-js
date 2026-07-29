@@ -65,7 +65,7 @@ export function signRequest(priv64: Uint8Array, requestId: string, inst: number,
 
 export function signResponse(priv64: Uint8Array, requestId: string, time: bigint, data: Uint8Array): Uint8Array {
   const timeBuf = new Uint8Array(8);
-  new DataView(timeBuf.buffer).setBigInt64(0, time, true);
+  new DataView(timeBuf.buffer).setBigUint64(0, time, true);
   const msg = responseSignBytes(requestId, timeBuf, data);
   return signBytes(priv64, msg);
 }

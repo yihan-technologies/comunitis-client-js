@@ -543,6 +543,9 @@ export class KeyManager {
       };
       const newKey = generateFieldKey();
       const updatedVersions = [...versions, newVer];
+      // Both storage writes complete before updating in-memory state.
+      // If storage write 2 (_writeFieldPrivKey) throws, chainVersions and privKeys
+      // are not updated, keeping in-memory state consistent with what is on disk.
       await this.writeL1(this.ns + ':versions:' + chainId, updatedVersions);
       await this._writeFieldPrivKey(newVer.versionId, newKey, chain.altSaltId ?? null);
       this.chainVersions.set(chainId, updatedVersions);

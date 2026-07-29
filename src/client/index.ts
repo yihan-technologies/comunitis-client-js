@@ -86,6 +86,7 @@ import { peerIdFromString } from '@libp2p/peer-id';
 //   field 2 (Data, 32 bytes):        0x12 0x20 [32 bytes]
 // This is what Go's crypto.UnmarshalPublicKey() expects.
 function marshalEd25519PubKey(rawPub: Uint8Array): Uint8Array {
+  if (rawPub.length !== 32) throw new Error(`Expected 32-byte Ed25519 key, got ${rawPub.length}`);
   const out = new Uint8Array(4 + rawPub.length);
   out[0] = 0x08; out[1] = 0x01;
   out[2] = 0x12; out[3] = rawPub.length;
@@ -114,6 +115,9 @@ export class ComunitisClient extends EventTarget {
   private reconnectTimer: ReturnType<typeof setInterval> | null = null;
   // Peer IDs parsed from bootstrap addresses — these are the server peers.
   private bootstrapPeerIds: Set<string> = new Set();
+  // Stored handler references so they can be removed in disconnect().
+  private _onPeerConnect: (() => void) | null = null;
+  private _onPeerDisconnect: (() => void) | null = null;
 
   /**
    * Async alternative to addEventListener('request', ...) for inbound requests.
@@ -161,9 +165,11 @@ export class ComunitisClient extends EventTarget {
     });
 
     // Track peer count changes and emit events for consumers.
-    const onPeerChange = () => this.dispatchEvent(new CustomEvent('peercountchange'));
-    this.node.addEventListener('peer:connect', onPeerChange);
-    this.node.addEventListener('peer:disconnect', onPeerChange);
+    // Store handler references so they can be removed in disconnect().
+    this._onPeerConnect = () => this.dispatchEvent(new CustomEvent('peercountchange'));
+    this._onPeerDisconnect = () => this.dispatchEvent(new CustomEvent('peercountchange'));
+    this.node.addEventListener('peer:connect', this._onPeerConnect);
+    this.node.addEventListener('peer:disconnect', this._onPeerDisconnect);
 
     let started = false;
     try {
@@ -217,9 +223,11 @@ export class ComunitisClient extends EventTarget {
     } catch (err) {
       if (started) await Promise.resolve(this.node.stop()).catch(() => null);
       else {
-        this.node.removeEventListener('peer:connect', onPeerChange);
-        this.node.removeEventListener('peer:disconnect', onPeerChange);
+        if (this._onPeerConnect) this.node.removeEventListener('peer:connect', this._onPeerConnect);
+        if (this._onPeerDisconnect) this.node.removeEventListener('peer:disconnect', this._onPeerDisconnect);
       }
+      this._onPeerConnect = null;
+      this._onPeerDisconnect = null;
       this.node = null;
       throw err;
     }
@@ -235,6 +243,11 @@ export class ComunitisClient extends EventTarget {
       this.dht = null;
     }
     if (this.node) {
+      // Remove event listeners before stopping to prevent leaks on reconnect.
+      if (this._onPeerConnect) this.node.removeEventListener('peer:connect', this._onPeerConnect);
+      if (this._onPeerDisconnect) this.node.removeEventListener('peer:disconnect', this._onPeerDisconnect);
+      this._onPeerConnect = null;
+      this._onPeerDisconnect = null;
       await this.node.stop();
       this.node = null;
     }
@@ -442,7 +455,7 @@ export class ComunitisClient extends EventTarget {
       }
     }
 
-    if (res.ErrCode != null || res.Err) {
+    if ((res.ErrCode != null && res.ErrCode !== 0) || res.Err) {
       console.warn('[p2p] request error: ', res, " Error Code: ", res.ErrCode, " Error: ", res.Err);
       throw Object.assign(new Error(res.Err ?? 'server error'), { code: res.ErrCode });
     }
@@ -453,12 +466,14 @@ export class ComunitisClient extends EventTarget {
   // ── Inbound handler (client↔client) ────────────────────────────────────────
 
   private async handleInbound(stream: Stream, _connection: Connection): Promise<void> {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     const reqBytes = await Promise.race([
       readMessage(stream),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('inbound read timeout')), 30000)
-      ),
+      new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('inbound read timeout')), 30000);
+      }),
     ]);
+    clearTimeout(timeoutId);
     const req = fromBinary(TransferSingleSchema, reqBytes);
 
     let respondCalled = false;

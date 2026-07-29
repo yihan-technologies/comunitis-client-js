@@ -12,7 +12,7 @@
  *   /prov/<key>      — content provider list (for libp2p rendezvous)
  */
 
-import type { Libp2p, PeerId, Stream } from '@libp2p/interface';
+import type { Libp2p, PeerId, Stream, Connection } from '@libp2p/interface';
 import type { Uint8ArrayList } from 'uint8arraylist';
 import { idFromPeer, idFromKey, type NodeID } from './node-id.js';
 import { RoutingTable, type PeerEntry, K, ALPHA } from './routing-table.js';
@@ -58,9 +58,11 @@ async function readAll(stream: Stream): Promise<Uint8Array> {
 async function sendAndClose(stream: Stream, data: Uint8Array): Promise<void> {
   const ok = stream.send(data);
   if (ok === false) {
-    await new Promise<void>(resolve =>
-      stream.addEventListener('drain', resolve as () => void, { once: true })
-    );
+    // Wait for drain with a 5s timeout to prevent hanging if drain never fires.
+    await new Promise<void>((resolve) => {
+      const timer = setTimeout(resolve, 5000);
+      stream.addEventListener('drain', () => { clearTimeout(timer); resolve(); }, { once: true });
+    });
   }
   await stream.close();
 }
@@ -82,8 +84,7 @@ export class ComunitisKadDHT {
 
   /** Register the protocol handler and start the store janitor. */
   async start(): Promise<void> {
-    await this.libp2p.handle(this.protocolId, (data: any) => {
-      const stream: Stream = data.stream ?? data;
+    await this.libp2p.handle(this.protocolId, (stream: Stream, _connection: Connection) => {
       this.handleStream(stream).catch(() => stream.abort(new Error('dht: handler error')));
     });
     this.janitor = setInterval(() => this.evictExpired(), 5 * 60 * 1000);
@@ -294,8 +295,11 @@ export class ComunitisKadDHT {
     const seeds = this.rt.closestPeers(target, K);
     const queried = new Set<string>();
     let pending = [...seeds];
+    let rounds = 0;
+    const MAX_ROUNDS = 20;
 
     for (;;) {
+      if (rounds++ >= MAX_ROUNDS) break;
       const batch: PeerEntry[] = [];
       const next: PeerEntry[] = [];
       for (const p of pending) {
