@@ -1,4 +1,5 @@
 import { fromBinary } from '@bufbuild/protobuf';
+import { argon2id } from 'hash-wasm';
 import { BootDataSchema, KeyFileUpdateSchema, type BootData, type NetworkCredential } from '../proto/index_pb.js';
 
 export interface ServerKeyFileData {
@@ -7,19 +8,44 @@ export interface ServerKeyFileData {
   network: NetworkCredential | undefined;
 }
 
-// Derive 32-byte AES key: SHA-256(UTF-8 password) — mirrors Go's deriveKey().
-async function deriveKey(password: string): Promise<CryptoKey> {
-  const pw = new TextEncoder().encode(password);
-  const raw = await crypto.subtle.digest('SHA-256', pw);
-  return crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
+// Magic: "CMKF" + version 1 — new Argon2id format sentinel.
+const KEYFILE_MAGIC = new Uint8Array([0x43, 0x4d, 0x4b, 0x46, 0x01, 0x00, 0x00, 0x00]);
+const KEYFILE_SALT_LEN = 32;
+
+function magicMatches(data: Uint8Array): boolean {
+  if (data.length < KEYFILE_MAGIC.length) return false;
+  for (let i = 0; i < KEYFILE_MAGIC.length; i++) {
+    if (data[i] !== KEYFILE_MAGIC[i]) return false;
+  }
+  return true;
+}
+
+// SHA-256(UTF-8 password) → 32 bytes. Mirrors Go deriveKey().
+async function sha256Password(password: string): Promise<Uint8Array> {
+  const raw = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
+  return new Uint8Array(raw);
+}
+
+// Argon2id(intermediate, salt) → 32-byte AES key. Mirrors Go deriveKeyArgon2id().
+async function argon2idDeriveKey(intermediate: Uint8Array, salt: Uint8Array): Promise<Uint8Array> {
+  const hex = await argon2id({
+    password: intermediate,
+    salt,
+    iterations: 3,
+    memorySize: 65536,
+    parallelism: 4,
+    hashLength: 32,
+    outputType: 'hex',
+  });
+  const result = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) result[i / 2] = parseInt(hex.slice(i, i + 2), 16);
+  return result;
 }
 
 // AES-256-GCM decrypt: format is [12-byte nonce][ciphertext+tag].
 async function aesDecrypt(key: CryptoKey, data: Uint8Array): Promise<Uint8Array> {
   if (data.length < 12) throw new Error('encrypted blob too short');
-  const iv = data.slice(0, 12);
-  const ct = data.slice(12);
-  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: data.slice(0, 12) }, key, data.slice(12));
   return new Uint8Array(plain);
 }
 
@@ -29,8 +55,7 @@ async function readFrame(buf: Uint8Array, offset: number, key: CryptoKey): Promi
   const len = new DataView(buf.buffer, buf.byteOffset + offset, 4).getUint32(0, true);
   offset += 4;
   if (offset + len > buf.length) throw new Error('frame extends beyond file');
-  const encrypted = buf.slice(offset, offset + len);
-  const plain = await aesDecrypt(key, encrypted);
+  const plain = await aesDecrypt(key, buf.slice(offset, offset + len));
   return [plain, offset + len];
 }
 
@@ -70,19 +95,41 @@ function applyUpdate(data: BootData, u: ReturnType<typeof fromBinary<typeof KeyF
 /**
  * Parse a binary key file produced by the Comunitis Go server.
  *
- * Format: sequence of [4-byte LE length][AES-256-GCM encrypted blob] frames.
- * - Frame 0: encrypted BootData protobuf (contains private key + network config).
- * - Frames 1+: encrypted KeyFileUpdate protobufs (optional append-only mutations).
+ * New format (magic "CMKF\x01\x00\x00\x00" at byte 0):
+ *   [8-byte magic][32-byte Argon2id salt][frames...]
+ *   AES key = Argon2id(SHA-256(password), salt, t=3, m=65536, p=4, keyLen=32)
  *
- * The encryption key is SHA-256(password).
+ * Legacy format (no magic):
+ *   [frames...]
+ *   AES key = SHA-256(password)
+ *
+ * Each frame: [4-byte LE uint32 length][AES-256-GCM ciphertext]
+ * Frame 0 → BootData proto; Frame 1+ → KeyFileUpdate proto (applied in order).
  *
  * @throws if password is wrong (decryption fails) or file is corrupt.
  */
 export async function parseServerKeyFile(data: Uint8Array, password: string): Promise<ServerKeyFileData> {
-  const key = await deriveKey(password);
+  const intermediate = await sha256Password(password);
+
+  let frameOffset: number;
+  let aesKeyRaw: Uint8Array;
+
+  if (magicMatches(data)) {
+    // New format: Argon2id KDF with per-file salt.
+    if (data.length < 8 + KEYFILE_SALT_LEN) throw new Error('Key file too short');
+    const salt = data.slice(8, 8 + KEYFILE_SALT_LEN);
+    aesKeyRaw = await argon2idDeriveKey(intermediate, salt);
+    frameOffset = 8 + KEYFILE_SALT_LEN;
+  } else {
+    // Legacy format: SHA-256 only.
+    aesKeyRaw = intermediate;
+    frameOffset = 0;
+  }
+
+  const aesKey = await crypto.subtle.importKey('raw', aesKeyRaw, 'AES-GCM', false, ['decrypt']);
 
   // Read first frame — BootData
-  const [frame0, next] = await readFrame(data, 0, key).catch(() => {
+  const [frame0, next] = await readFrame(data, frameOffset, aesKey).catch(() => {
     throw new Error('Wrong password or corrupt key file');
   });
   const bootData = fromBinary(BootDataSchema, frame0);
@@ -91,9 +138,8 @@ export async function parseServerKeyFile(data: Uint8Array, password: string): Pr
   let offset = next;
   while (offset < data.length) {
     try {
-      const [frame, nextOff] = await readFrame(data, offset, key);
-      const update = fromBinary(KeyFileUpdateSchema, frame);
-      applyUpdate(bootData, update);
+      const [frame, nextOff] = await readFrame(data, offset, aesKey);
+      applyUpdate(bootData, fromBinary(KeyFileUpdateSchema, frame));
       offset = nextOff;
     } catch {
       break; // EOF or partial trailing data — stop
@@ -107,7 +153,6 @@ export async function parseServerKeyFile(data: Uint8Array, password: string): Pr
   if (bootData.PubKey && bootData.PubKey.length > 0) {
     rawPub = unmarshalPubKey(bootData.PubKey) ?? bootData.PubKey.slice(0, 32);
   } else {
-    // Derive pubkey from seed (first 32 bytes of 64-byte privkey)
     const { ed25519 } = await import('@noble/curves/ed25519.js');
     rawPub = ed25519.getPublicKey(rawPriv.slice(0, 32));
   }

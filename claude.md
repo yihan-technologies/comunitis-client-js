@@ -130,13 +130,23 @@ km:altpriv:<id>:<altId> → alt-encrypted private key
 Crypto stack: `@noble/curves/ed25519` (Ed25519 + x25519), `@noble/hashes/sha2`, Web Crypto API AES-256-GCM, `hash-wasm` Argon2id.
 
 ## `parseServerKeyFile` (`src/keyfile/parse.ts`)
-Parses Go server binary key file:
+Parses Go server binary key file. Supports two formats:
+
+**New format** (magic `CMKF\x01\x00\x00\x00` at offset 0):
 ```
-Frame format: [4-byte LE uint32 len][AES-256-GCM ciphertext]
+[8-byte magic][32-byte Argon2id salt][frames...]
+AES key = Argon2id(SHA-256(password), salt, t=3, m=65536, p=4, keyLen=32)
+```
+
+**Legacy format** (no magic):
+```
+[frames...]
 AES key = SHA-256(password)
-Frame 0 → decrypt → BootData proto
-Frame 1+ → decrypt → KeyFileUpdate proto (mutations applied in order)
 ```
+
+Each frame: `[4-byte LE uint32 len][AES-256-GCM ciphertext]`
+- Frame 0 → BootData proto
+- Frame 1+ → KeyFileUpdate proto (mutations applied in order)
 
 ## `parseGoExportBundle` (`src/keyfile/go-bundle.ts`)
 Parses Go KMGR binary keystore:
